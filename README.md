@@ -124,6 +124,7 @@ MURAT SEKMEN. "Formal Symbolic Analysis of a Cross-Session Holder-Binding
 Confusion in the OpenID4VCI Interactive Authorization Endpoint."
 2026. <github.com/congenial-max/OpenID4VCI_v1-1_IAE_cross-session-holder-binding-confusion_FormalSecurityAnalysis>.
 ```
+A peer-reviewed venue citation will be substituted when the corresponding paper is published.
 
 ## References
 
