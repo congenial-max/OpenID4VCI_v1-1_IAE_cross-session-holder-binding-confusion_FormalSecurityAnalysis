@@ -1,0 +1,2 @@
+# OpenID4VCI_v1-1_IAE_cross-session-holder-binding-confusion_FormalSecurityAnalysis
+Tamarin Prover formalization of a cross-session holder-binding confusion attack (A1) on the OpenID4VCI 1.1 Interactive Authorization Endpoint (presentation-during-issuance). Four #ifdef configurations: the vulnerable spec, a failed nonce fix, and two verified fixes (holder-key continuity and a transaction_data commitment).
