@@ -1,0 +1,1595 @@
+Running as unit: run-r477091f697b64778b94a59575f9c9767.scope; invocation ID: 786d6df88d474be1ba07128d168086fb
+maude tool: 'maude'
+ checking version: 3.5.1. OK.
+ checking installation: OK.
+[Theory OID4VCI_A1] Theory loaded
+[Theory OID4VCI_A1] Theory translated
+[Theory OID4VCI_A1] Theory closed
+[Saturating Sources] Step 1 (Max 50)
+[Saturating Sources] Done
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !CI_Authorized_Tx( $CI, authSess, AT, pk(~skH), sub, nonce,                   h(pk(x))) ▶₁ #iss
+1: !Ltk_CI( $CI, ~ltkCI ) ▶₂ #iss
+2: !Ltk_PI( $PI, ~ltkPI ) ▶₁ #v
+3: !KU( pk(x) ) @ #vk.5
+4: !KU( sign(<'oid4vci-proof', $CI, pk(x)>, x) ) @ #vk.7
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+1
+2
+3
+4
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !CI_Authorized_Tx( $CI, authSess, AT, pk(~skH), sub, nonce,                   h(pk(~skAdv))) ▶₁ #iss
+1: !Ltk_CI( $CI, ~ltkCI ) ▶₂ #iss
+2: !Ltk_PI( $PI, ~ltkPI ) ▶₁ #v
+3: !KU( pk(~skAdv) ) @ #vk.5
+4: !KU( sign(<'oid4vci-proof', $CI, pk(~skAdv)>, ~skAdv) ) @ #vk.7
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+1
+2
+3
+4
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+[Saturating Sources] Step 1 (Max 50)
+[Saturating Sources] Done
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !Ltk_CI( $CI, ~ltkCI ) ▶₂ #iss
+1: !Ltk_PI( $PI, ~ltkPI ) ▶₁ #v
+2: !KU( pk(~skAdv) ) @ #vk.5
+3: !KU( sign(<'oid4vci-proof', $CI, pk(~skAdv)>, ~skAdv) ) @ #vk.7
+4: !KU( ~authSess ) @ #vk.15
+5: !KU( pk(~skH) ) @ #vk.23
+6: !KU( h(pk(~skAdv)) ) @ #vk.25
+7: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.27
+8: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skAdv))>, ~skH)) @ #vk.28
+9: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.3
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+1
+2
+3
+5
+6
+7
+8
+9
+4
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !Ltk_CI( $CI, ~ltkCI ) ▶₂ #iss
+1: !Ltk_PI( $PI, ~ltkPI ) ▶₁ #v
+2: !KU( pk(x) ) @ #vk.5
+3: !KU( sign(<'oid4vci-proof', $CI, pk(x)>, x) ) @ #vk.7
+4: !KU( ~authSess ) @ #vk.15
+5: !KU( pk(~skH) ) @ #vk.23
+6: !KU( h(pk(x)) ) @ #vk.25
+7: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.27
+8: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(x))>, ~skH)) @ #vk.28
+9: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.3
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+1
+2
+3
+5
+6
+7
+8
+9
+4
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !Ltk_PI( $PI, ~ltkPI ) ▶₁ #v
+1: !KU( pk(x) ) @ #vk.5
+2: !KU( sign(<'oid4vci-proof', $CI, pk(x)>, x) ) @ #vk.7
+3: !KU( ~authSess ) @ #vk.15
+4: !KU( pk(~skH) ) @ #vk.23
+5: !KU( h(pk(x)) ) @ #vk.25
+6: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.27
+7: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(x))>, ~skH)) @ #vk.28
+8: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.3
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+1
+2
+4
+5
+6
+7
+8
+3
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !Ltk_PI( $PI, ~ltkPI ) ▶₁ #v
+1: !KU( pk(~skAdv) ) @ #vk.5
+2: !KU( sign(<'oid4vci-proof', $CI, pk(~skAdv)>, ~skAdv) ) @ #vk.7
+3: !KU( ~authSess ) @ #vk.15
+4: !KU( pk(~skH) ) @ #vk.23
+5: !KU( h(pk(~skAdv)) ) @ #vk.25
+6: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.27
+7: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skAdv))>, ~skH)) @ #vk.28
+8: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.3
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+1
+2
+4
+5
+6
+7
+8
+3
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( pk(~skAdv) ) @ #vk.5
+1: !KU( sign(<'oid4vci-proof', $CI, pk(~skAdv)>, ~skAdv) ) @ #vk.7
+2: !KU( ~authSess ) @ #vk.15
+3: !KU( pk(~skH) ) @ #vk.23
+4: !KU( h(pk(~skAdv)) ) @ #vk.25
+5: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.27
+6: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skAdv))>, ~skH)) @ #vk.28
+7: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.3
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+1
+3
+4
+5
+6
+7
+2
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( pk(x) ) @ #vk.5
+1: !KU( sign(<'oid4vci-proof', $CI, pk(x)>, x) ) @ #vk.7
+2: !KU( ~authSess ) @ #vk.15
+3: !KU( pk(~skH) ) @ #vk.23
+4: !KU( h(pk(x)) ) @ #vk.25
+5: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.27
+6: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(x))>, ~skH)) @ #vk.28
+7: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.3
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+1
+3
+4
+5
+6
+7
+2
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( sign(<'oid4vci-proof', $CI, pk(~skAdv)>, ~skAdv) ) @ #vk.7
+1: !KU( ~authSess ) @ #vk.15
+2: !KU( pk(~skH) ) @ #vk.23
+3: !KU( h(pk(~skAdv)) ) @ #vk.25
+4: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.27
+5: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skAdv))>, ~skH)) @ #vk.28
+6: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.4
+7: !KU( ~skAdv ) @ #vk.30
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+2
+3
+4
+5
+6
+1
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( sign(<'oid4vci-proof', $CI, pk(~skHiss)>, ~skHiss) ) @ #vk.7
+1: !KU( ~authSess ) @ #vk.15
+2: !KU( pk(~skH) ) @ #vk.23
+3: !KU( h(pk(~skHiss)) ) @ #vk.25
+4: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.27
+5: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.28
+6: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.4
+7: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.48
+8: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.53
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+2
+3
+4
+5
+6
+7
+8
+1
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.16
+1: !KU( pk(~skH) ) @ #vk.24
+2: !KU( h(pk(~skAdv)) ) @ #vk.26
+3: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.28
+4: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skAdv))>, ~skH)) @ #vk.29
+5: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.7
+6: !KU( ~skAdv ) @ #vk.31
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+0
+6
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.17
+1: !KU( pk(~skH) ) @ #vk.25
+2: !KU( h(pk(~skHiss)) ) @ #vk.27
+3: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.29
+4: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.30
+5: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.6
+6: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.53
+7: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.57
+8: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.3>,          ~ltkCI)) @ #vk.64
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+7
+8
+0
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.18
+1: !KU( h(pk(~skAdv)) ) @ #vk.27
+2: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.29
+3: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skAdv))>, ~skH)) @ #vk.30
+4: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.10
+5: !KU( ~skAdv ) @ #vk.32
+6: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.43
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+0
+5
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.20
+1: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.29
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skAdv))>, ~skH)) @ #vk.30
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.12
+4: !KU( ~skAdv ) @ #vk.32
+5: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.43
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+5
+0
+4
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.23
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skAdv))>, ~skH)) @ #vk.30
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.15
+3: !KU( ~skAdv ) @ #vk.32
+4: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.45
+5: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.51
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+4
+5
+0
+3
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.20
+1: !KU( h(pk(~skHiss)) ) @ #vk.29
+2: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.31
+3: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.32
+4: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.8
+5: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.57
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.61
+7: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.3>,          ~ltkCI)) @ #vk.66
+8: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.4>,          ~ltkCI.3)) @ #vk.73
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+7
+8
+0
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.24
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skAdv))>, ~skH)) @ #vk.32
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.16
+3: !KU( ~skAdv ) @ #vk.34
+4: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.45
+5: !KU( ~ltkPI.1 ) @ #vk.47
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+4
+0
+3
+5
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.23
+1: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.32
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.33
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.10
+4: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.60
+5: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.2)) @ #vk.64
+6: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.4>,          ~ltkCI)) @ #vk.68
+7: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.73
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+7
+0
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.27
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.34
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.13
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.3>,          ~ltkCI.1)) @ #vk.63
+4: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.2>,          ~ltkCI.2)) @ #vk.67
+5: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.4>,          ~ltkCI)) @ #vk.71
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.75
+7: !KU( sign(<'openid4vp-request', $CI.4, <'iar', $CI.4>, nonce.5>,          ~ltkCI.4)) @ #vk.81
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+7
+0
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.28
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.36
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.14
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.3>,          ~ltkCI.1)) @ #vk.63
+4: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.2>,          ~ltkCI.2)) @ #vk.67
+5: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.4>,          ~ltkCI)) @ #vk.71
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.75
+7: !KU( ~ltkPI.1 ) @ #vk.77
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+0
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.23
+1: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.32
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.33
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.10
+4: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.60
+5: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.2)) @ #vk.64
+6: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.4>,          ~ltkCI)) @ #vk.68
+7: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.73
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+7
+0
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.27
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.34
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.13
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.63
+4: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.2)) @ #vk.67
+5: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.4>,          ~ltkCI)) @ #vk.71
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.75
+7: !KU( sign(<'openid4vp-request', $CI.4, <'iar', $CI.4>, nonce.5>,          ~ltkCI.4)) @ #vk.81
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+7
+0
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.28
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.36
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.14
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.63
+4: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.2)) @ #vk.67
+5: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.4>,          ~ltkCI)) @ #vk.71
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.75
+7: !KU( ~ltkPI.1 ) @ #vk.77
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+0
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.16
+1: !KU( pk(~skH) ) @ #vk.24
+2: !KU( h(pk(~skHiss)) ) @ #vk.26
+3: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.28
+4: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.29
+5: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.7
+6: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.50
+7: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.54
+8: !KU( ~skHiss ) @ #vk.56
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+7
+0
+8
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.18
+1: !KU( h(pk(~skHiss)) ) @ #vk.27
+2: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.29
+3: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.30
+4: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.10
+5: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.53
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.57
+7: !KU( ~skHiss ) @ #vk.58
+8: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.3)) @ #vk.65
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+8
+0
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.20
+1: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.29
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.30
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.12
+4: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.55
+5: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.2)) @ #vk.59
+6: !KU( ~skHiss ) @ #vk.60
+7: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.65
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+7
+0
+6
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.23
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.30
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.15
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.3>,          ~ltkCI.1)) @ #vk.58
+4: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.2>,          ~ltkCI.2)) @ #vk.62
+5: !KU( ~skHiss ) @ #vk.63
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.67
+7: !KU( sign(<'openid4vp-request', $CI.4, <'iar', $CI.4>, nonce.4>,          ~ltkCI.4)) @ #vk.73
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+7
+0
+5
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.24
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.32
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.16
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.3>,          ~ltkCI.1)) @ #vk.58
+4: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.2>,          ~ltkCI.2)) @ #vk.62
+5: !KU( ~skHiss ) @ #vk.63
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.67
+7: !KU( ~ltkPI.1 ) @ #vk.69
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+0
+5
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.20
+1: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.29
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.30
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.12
+4: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.55
+5: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.2)) @ #vk.59
+6: !KU( ~skHiss ) @ #vk.60
+7: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.65
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+7
+0
+6
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.23
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.30
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.15
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.58
+4: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.2)) @ #vk.62
+5: !KU( ~skHiss ) @ #vk.63
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.67
+7: !KU( sign(<'openid4vp-request', $CI.4, <'iar', $CI.4>, nonce.4>,          ~ltkCI.4)) @ #vk.73
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+7
+0
+5
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.24
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.32
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.16
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.58
+4: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.2)) @ #vk.62
+5: !KU( ~skHiss ) @ #vk.63
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.67
+7: !KU( ~ltkPI.1 ) @ #vk.69
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+0
+5
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( sign(<'oid4vci-proof', $CI, pk(~skE)>, ~skE) ) @ #vk.7
+1: !KU( ~authSess ) @ #vk.15
+2: !KU( pk(~skH) ) @ #vk.23
+3: !KU( h(pk(~skE)) ) @ #vk.25
+4: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.27
+5: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skE))>, ~skH)) @ #vk.28
+6: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.4
+7: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.48
+8: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.53
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+2
+3
+4
+5
+6
+7
+8
+1
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.16
+1: !KU( pk(~skH) ) @ #vk.24
+2: !KU( h(pk(~skE)) ) @ #vk.26
+3: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.28
+4: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skE))>, ~skH)) @ #vk.29
+5: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.7
+6: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.50
+7: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.54
+8: !KU( ~skE ) @ #vk.56
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+7
+0
+8
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.18
+1: !KU( h(pk(~skE)) ) @ #vk.27
+2: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.29
+3: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skE))>, ~skH)) @ #vk.30
+4: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.10
+5: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.53
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.57
+7: !KU( ~skE ) @ #vk.58
+8: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.3)) @ #vk.65
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+8
+0
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.20
+1: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.29
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skE))>, ~skH)) @ #vk.30
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.12
+4: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.55
+5: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.2)) @ #vk.59
+6: !KU( ~skE ) @ #vk.60
+7: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.65
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+7
+0
+6
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.23
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skE))>, ~skH)) @ #vk.30
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.15
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.58
+4: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.2)) @ #vk.62
+5: !KU( ~skE ) @ #vk.63
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.67
+7: !KU( sign(<'openid4vp-request', $CI.4, <'iar', $CI.4>, nonce.4>,          ~ltkCI.4)) @ #vk.73
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+7
+0
+5
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.24
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skE))>, ~skH)) @ #vk.32
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.16
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.58
+4: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.2)) @ #vk.62
+5: !KU( ~skE ) @ #vk.63
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.67
+7: !KU( ~ltkPI.1 ) @ #vk.69
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+0
+5
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( sign(<'oid4vci-proof', $CI, pk(~ltkCI)>, ~ltkCI) ) @ #vk.7
+1: !KU( ~authSess ) @ #vk.15
+2: !KU( pk(~skH) ) @ #vk.23
+3: !KU( h(pk(~ltkCI)) ) @ #vk.25
+4: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.27
+5: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~ltkCI))>, ~skH)) @ #vk.28
+6: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.4
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+2
+3
+4
+5
+6
+1
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.16
+1: !KU( pk(~skH) ) @ #vk.24
+2: !KU( h(pk(~ltkCI)) ) @ #vk.26
+3: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.28
+4: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~ltkCI))>, ~skH)) @ #vk.29
+5: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.7
+6: !KU( ~ltkCI ) @ #vk.32
+7: !Ltk_CI( $CI.1, ~ltkCI.2 ) ▶₀ #l
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+7
+0
+6
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.19
+1: !KU( h(pk(~ltkCI)) ) @ #vk.28
+2: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.30
+3: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~ltkCI))>, ~skH)) @ #vk.31
+4: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.11
+5: !KU( ~ltkCI ) @ #vk.3
+6: !Ltk_CI( $CI.1, ~ltkCI.2 ) ▶₀ #l
+7: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.43
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+7
+0
+5
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.21
+1: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.30
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~ltkCI))>, ~skH)) @ #vk.31
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.13
+4: !KU( ~ltkCI ) @ #vk.4
+5: !Ltk_CI( $CI.1, ~ltkCI.2 ) ▶₀ #l
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.43
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+5
+6
+0
+4
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.24
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~ltkCI))>, ~skH)) @ #vk.31
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.16
+3: !KU( ~ltkCI ) @ #vk.5
+4: !Ltk_CI( $CI.1, ~ltkCI.2 ) ▶₀ #l
+5: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.45
+6: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.2>,          ~ltkCI.4)) @ #vk.51
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+4
+5
+6
+0
+3
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.25
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~ltkCI))>, ~skH)) @ #vk.33
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.17
+3: !KU( ~ltkCI ) @ #vk.5
+4: !Ltk_CI( $CI.1, ~ltkCI.2 ) ▶₀ #l
+5: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,          ~ltkCI.3)) @ #vk.45
+6: !KU( ~ltkPI.1 ) @ #vk.47
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+4
+5
+0
+3
+6
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( sign(<'oid4vci-proof', $CI, pk(~ltkPI)>, ~ltkPI) ) @ #vk.7
+1: !KU( ~authSess ) @ #vk.15
+2: !KU( pk(~skH) ) @ #vk.23
+3: !KU( h(pk(~ltkPI)) ) @ #vk.25
+4: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.2) ) @ #vk.27
+5: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~ltkPI))>, ~skH)) @ #vk.28
+6: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.4
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+2
+3
+4
+5
+6
+1
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.16
+1: !KU( pk(~skH) ) @ #vk.24
+2: !KU( h(pk(~ltkPI)) ) @ #vk.26
+3: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.2) ) @ #vk.28
+4: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~ltkPI))>, ~skH)) @ #vk.29
+5: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.7
+6: !KU( ~ltkPI ) @ #vk.32
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+0
+6
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.18
+1: !KU( h(pk(~ltkPI)) ) @ #vk.27
+2: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.2) ) @ #vk.29
+3: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~ltkPI))>, ~skH)) @ #vk.30
+4: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.10
+5: !KU( ~ltkPI ) @ #vk.32
+6: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.43
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+0
+5
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.20
+1: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.2) ) @ #vk.29
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~ltkPI))>, ~skH)) @ #vk.30
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.12
+4: !KU( ~ltkPI ) @ #vk.32
+5: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.43
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+5
+0
+4
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.23
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~ltkPI))>, ~skH)) @ #vk.30
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.15
+3: !KU( ~ltkPI ) @ #vk.32
+4: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.45
+5: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.51
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+4
+5
+0
+3
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.24
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~ltkPI))>, ~skH)) @ #vk.32
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.16
+3: !KU( ~ltkPI ) @ #vk.34
+4: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.45
+5: !KU( ~ltkPI.2 ) @ #vk.47
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+4
+0
+3
+5
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( sign(<'oid4vci-proof', $CI, pk(~skH)>, ~skH) ) @ #vk.7
+1: !KU( ~authSess ) @ #vk.15
+2: !KU( pk(~skH.1) ) @ #vk.23
+3: !KU( h(pk(~skH)) ) @ #vk.25
+4: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH.1)>, ~ltkPI.1)) @ #vk.27
+5: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skH))>, ~skH.1)) @ #vk.28
+6: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.4
+7: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.39
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+2
+3
+4
+5
+6
+7
+1
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.16
+1: !KU( pk(~skH.1) ) @ #vk.24
+2: !KU( h(pk(~skH)) ) @ #vk.26
+3: !KU( sign(<'prereq-vc', $PI.2, sub, pk(~skH.1)>, ~ltkPI.2)) @ #vk.28
+4: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skH))>, ~skH.1)) @ #vk.29
+5: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.7
+6: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.40
+7: !KU( ~skH ) @ #vk.42
+8: !StoredVictimHolderKey( $Wid.1, ~skH.2, pk(~skH) ) ▶₀ #l
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+8
+0
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.19
+1: !KU( h(pk(~skH)) ) @ #vk.28
+2: !KU( sign(<'prereq-vc', $PI.2, sub, pk(~skH.1)>, ~ltkPI.2)) @ #vk.30
+3: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skH))>, ~skH.1)) @ #vk.31
+4: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.11
+5: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.44
+6: !KU( ~skH ) @ #vk.3
+7: !StoredVictimHolderKey( $Wid, ~skH.2, pk(~skH) ) ▶₀ #l
+8: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.51
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+7
+8
+0
+6
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.21
+1: !KU( sign(<'prereq-vc', $PI.2, sub, pk(~skH.1)>, ~ltkPI.2)) @ #vk.30
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skH))>, ~skH.1)) @ #vk.31
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.13
+4: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.46
+5: !KU( ~skH ) @ #vk.4
+6: !StoredVictimHolderKey( $Wid, ~skH.2, pk(~skH) ) ▶₀ #l
+7: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.51
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+7
+0
+5
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.24
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skH))>, ~skH.1)) @ #vk.31
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.16
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.49
+4: !KU( ~skH ) @ #vk.5
+5: !StoredVictimHolderKey( $Wid, ~skH.2, pk(~skH) ) ▶₀ #l
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.53
+7: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.3)) @ #vk.59
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+5
+6
+7
+0
+4
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.25
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skH))>, ~skH.1)) @ #vk.33
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.17
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.49
+4: !KU( ~skH ) @ #vk.5
+5: !StoredVictimHolderKey( $Wid, ~skH.2, pk(~skH) ) ▶₀ #l
+6: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.53
+7: !KU( ~ltkPI.2 ) @ #vk.55
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+5
+6
+0
+4
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( sign(<'oid4vci-proof', $CI, pk(x)>, x) ) @ #vk.7
+1: !KU( ~authSess ) @ #vk.15
+2: !KU( pk(~skH) ) @ #vk.23
+3: !KU( h(pk(x)) ) @ #vk.25
+4: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.27
+5: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(x))>, ~skH)) @ #vk.28
+6: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.4
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+0
+2
+3
+4
+5
+6
+1
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.17
+1: !KU( pk(~skH) ) @ #vk.25
+2: !KU( h(pk(~skHiss)) ) @ #vk.27
+3: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.29
+4: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.30
+5: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.6
+6: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.1>,          ~ltkCI)) @ #vk.48
+7: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.53
+8: !KU( ~skHiss ) @ #vk.32
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+7
+0
+8
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.20
+1: !KU( h(pk(~skHiss)) ) @ #vk.29
+2: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.31
+3: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.32
+4: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.8
+5: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.1>,          ~ltkCI)) @ #vk.51
+6: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,          ~ltkCI.1)) @ #vk.55
+7: !KU( ~skHiss ) @ #vk.34
+8: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.3>,          ~ltkCI.2)) @ #vk.61
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+6
+8
+0
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.23
+1: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.32
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.33
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.10
+4: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.2>,          ~ltkCI)) @ #vk.53
+5: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.3>,          ~ltkCI.1)) @ #vk.57
+6: !KU( ~skHiss ) @ #vk.35
+7: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.2)) @ #vk.61
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+7
+0
+6
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.27
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.34
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.13
+3: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.3>,          ~ltkCI)) @ #vk.56
+4: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.1)) @ #vk.60
+5: !KU( ~skHiss ) @ #vk.36
+6: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.2)) @ #vk.63
+7: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.4>,          ~ltkCI.3)) @ #vk.69
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+7
+0
+5
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.28
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.36
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.14
+3: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.3>,          ~ltkCI)) @ #vk.56
+4: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.1)) @ #vk.60
+5: !KU( ~skHiss ) @ #vk.38
+6: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.2)) @ #vk.63
+7: !KU( ~ltkPI.1 ) @ #vk.65
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+0
+5
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.23
+1: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.32
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.33
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.10
+4: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.2>,          ~ltkCI)) @ #vk.53
+5: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.3>,          ~ltkCI.1)) @ #vk.57
+6: !KU( ~skHiss ) @ #vk.35
+7: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.2)) @ #vk.61
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+7
+0
+6
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.27
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.34
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.13
+3: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.2>,          ~ltkCI)) @ #vk.56
+4: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.3>,          ~ltkCI.1)) @ #vk.60
+5: !KU( ~skHiss ) @ #vk.36
+6: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.2)) @ #vk.63
+7: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.4>,          ~ltkCI.3)) @ #vk.69
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+7
+0
+5
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.28
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.36
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.14
+3: !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.2>,          ~ltkCI)) @ #vk.56
+4: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.3>,          ~ltkCI.1)) @ #vk.60
+5: !KU( ~skHiss ) @ #vk.38
+6: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.2)) @ #vk.63
+7: !KU( ~ltkPI.1 ) @ #vk.65
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+0
+5
+7
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.16
+1: !KU( pk(~skH) ) @ #vk.24
+2: !KU( h(pk(x)) ) @ #vk.26
+3: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.28
+4: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(x))>, ~skH)) @ #vk.29
+5: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.7
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+0
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.18
+1: !KU( h(pk(x)) ) @ #vk.27
+2: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.29
+3: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(x))>, ~skH)) @ #vk.30
+4: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.10
+5: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.43
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+0
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.20
+1: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.29
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.30
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.12
+4: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.45
+5: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.51
+6: !KU( ~skHiss ) @ #vk.32
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+5
+0
+6
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.23
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.30
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.15
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.49
+4: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.53
+5: !KU( ~skHiss ) @ #vk.32
+6: !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.3>,          ~ltkCI.3)) @ #vk.59
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+6
+0
+5
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.24
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(~skHiss))>,          ~skH)) @ #vk.32
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.16
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.49
+4: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.53
+5: !KU( ~skHiss ) @ #vk.34
+6: !KU( ~ltkPI.1 ) @ #vk.55
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+0
+5
+6
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.20
+1: !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1) ) @ #vk.29
+2: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(x))>, ~skH)) @ #vk.30
+3: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.12
+4: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.43
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+0
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.23
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(x))>, ~skH)) @ #vk.30
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.15
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.45
+4: !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,          ~ltkCI.2)) @ #vk.51
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+4
+0
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+>>>>>>>>>>>>>>>>>>>>>>>> START INPUT
+0: !KU( ~authSess ) @ #vk.24
+1: !KU( sign(<'kb-jwt-tx', <'iar', $CI>, ~nonce, h(pk(x))>, ~skH)) @ #vk.32
+2: !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.16
+3: !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.1>,          ~ltkCI.1)) @ #vk.45
+4: !KU( ~ltkPI.1 ) @ #vk.47
+
+>>>>>>>>>>>>>>>>>>>>>>>> START OUTPUT
+1
+2
+3
+0
+4
+
+>>>>>>>>>>>>>>>>>>>>>>>> END Tactic call
+
+
+==============================================================================
+summary of summaries:
+
+analyzed: OID4VCI_A1_IAE_holder_binding.spthy
+
+  output:          A1_IAE_holderbinding_FIXED-TXDATA_DependencyGraph.spthy
+  processing time: 7.39s
+  
+  ltkCI_secrecy (all-traces): verified (8 steps)
+  skH_secrecy (all-traces): verified (10 steps)
+  holderkey_unique (all-traces): verified (3 steps)
+  exec_honest_iae_flow (exists-trace): verified (29 steps)
+  a1_no_impersonation (all-traces): verified (14 steps)
+  a1_holder_authorization_txdata (all-traces): verified (111 steps)
+
+==============================================================================
+	Command being timed: "systemd-run --user --scope -p MemoryMax=200G -p MemorySwapMax=0 tamarin-prover OID4VCI_A1_IAE_holder_binding.spthy --prove -DFIXED_TXDATA --auto-sources --stop-on-trace=seqdfs --quit-on-warning -c=50 -s=50 --derivcheck-timeout=0 --output=A1_IAE_holderbinding_FIXED-TXDATA_DependencyGraph.spthy"
+	User time (seconds): 17.30
+	System time (seconds): 0.94
+	Percent of CPU this job got: 242%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.51
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 279200
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 76347
+	Voluntary context switches: 70358
+	Involuntary context switches: 696
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 88
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

@@ -1,0 +1,1123 @@
+/*
+-DVULNERABLE
+*/
+
+theory OID4VCI_A1
+
+begin
+
+// Function signature and definition of the equational theory E
+
+functions: aToken/3[private,constructor], fst/1, h/1, pair/2, pdec/2,
+           penc/3, pk/1, sign/2, snd/1, true/0, verify/3
+equations:
+    fst(<x.1, x.2>) = x.1,
+    pdec(penc(m, pk(k), r), k) = m,
+    snd(<x.1, x.2>) = x.2,
+    verify(sign(x.1, x.2), x.1, pk(x.2)) = true
+
+tactic: a1_witness_tactic
+presort: C
+prio: {id}
+  regex"CI_Issued\("
+  regex"CI_Accepted_Presentation\("
+  regex"Victim_Presented\("
+  regex"AdversaryKey\("
+  regex"!CI_Authorized"
+  regex"!CI_IAE_Pending\("
+deprio: {id}
+  regex"!KU\(~ltkCI"
+  regex"!KU\(~skH"
+  regex"!KU\(~"
+tactic: a1_continuity_tactic
+presort: C
+prio: {id}
+  regex"CI_Issued\("
+  regex"CI_Accepted_Presentation\("
+  regex"Victim_Presented\("
+  regex"Victim_Committed\("
+  regex"Reveal_HolderKey\("
+  regex"!CI_Authorized"
+  regex"!CI_IAE_Pending\("
+deprio: {id}
+  regex"!KU\(~ltkCI"
+  regex"!KU\(~skH"
+  regex"!KU\(~"
+tactic: a1_impersonation_tactic
+presort: C
+prio: {id}
+  regex"CI_Issued\("
+  regex"AdversaryKey\("
+  regex"CI_Accepted_Presentation\("
+  regex"Victim_Presented\("
+  regex"Victim_Committed\("
+  regex"!CI_Authorized"
+  regex"!CI_IAE_Pending\("
+deprio: {id}
+  regex"!KU\(~ltkCI"
+  regex"!KU\(~skH"
+  regex"!KU\(~"
+
+macros: iarAud( CI ) =  <'iar', CI>,
+        presReqPayload( CI, nonce ) =  <'openid4vp-request', CI, iarAud(CI), 
+                                        nonce>,
+        presReqSigned( CI, nonce, ltkCI ) =  <presReqPayload(CI, nonce), 
+                                              sign(presReqPayload(CI, nonce), ltkCI)>,
+        prereqPayload( PI, sub, pkH ) =  <'prereq-vc', PI, sub, pkH>,
+        prereqVC( PI, sub, pkH, ltkPI ) =  sign(prereqPayload(PI, sub, pkH),
+                                                ltkPI),
+        kbPayload( CI, nonce ) =  <'kb-jwt', iarAud(CI), nonce>,
+        kbProof( CI, nonce, skH ) =  sign(kbPayload(CI, nonce), skH),
+        kbPayloadTx( CI, nonce, cmt ) =  <'kb-jwt-tx', iarAud(CI), nonce, cmt>,
+        kbProofTx( CI, nonce, cmt, skH ) =  sign(kbPayloadTx(CI, nonce, cmt),
+                                                 skH),
+        keyProofPayload( CI, pkH ) =  <'oid4vci-proof', CI, pkH>,
+        keyProofJWT( CI, pkH, skH ) =  sign(keyProofPayload(CI, pkH), skH),
+        keyProofPayloadN( CI, pkH, nonce ) =  <'oid4vci-proof-n', CI, pkH, nonce
+                                              >,
+        keyProofJWTN( CI, pkH, nonce, skH ) =  sign(keyProofPayloadN(CI, pkH,
+                                                                     nonce),
+                                                    skH),
+        credPayload( CI, sub, pkH ) =  <'credential', CI, sub, pkH>,
+        credentialSig( CI, sub, pkH, ltkCI ) =  sign(credPayload(CI, sub, pkH),
+                                                     ltkCI)
+
+predicate: HonestCI( CI )<=>¬(∃ #r. Reveal_CI( CI ) @ #r)
+
+predicate: NoHolderKeyLeak( Wid, pkH )<=>¬(∃ #r. Reveal_HolderKey( Wid, pkH ) @ #r)
+
+restriction Eq:
+  "∀ x y #i. (Eq( x, y ) @ #i) ⇒ (x = y)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x y #i. (Eq( x, y ) @ #i) ⇒ (x = y)"
+  */
+
+restriction OnlyOnceV:
+  "∀ x #i #j. ((OnlyOnceV( x ) @ #i) ∧ (OnlyOnceV( x ) @ #j)) ⇒ (#i = #j)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #i #j. ((OnlyOnceV( x ) @ #i) ∧ (OnlyOnceV( x ) @ #j)) ⇒ (#i = #j)"
+  */
+
+rule (modulo E) Register_CI[color=#fef3c7, role='Setup']:
+   [ Fr( ~ltkCI ) ]
+  --[
+  Register_CI( $CI ), CIKey( $CI, ~ltkCI ), OnlyOnceV( <'reg-ci', $CI> )
+  ]->
+   [ !Ltk_CI( $CI, ~ltkCI ), !Pk_CI( $CI, pk(~ltkCI) ), Out( pk(~ltkCI) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Register_PI[color=#fef3c7, role='Setup']:
+   [ Fr( ~ltkPI ) ]
+  --[ Register_PI( $PI ), OnlyOnceV( <'reg-pi', $PI> ) ]->
+   [ !Ltk_PI( $PI, ~ltkPI ), !Pk_PI( $PI, pk(~ltkPI) ), Out( pk(~ltkPI) ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Issue_Prerequisite_VC[color=#fef3c7, role='Setup']:
+   [ Fr( ~skH ), !Ltk_PI( $PI, ~ltkPI ) ]
+  --[
+  VictimKeyFresh( $Wid, ~skH, pk(~skH) ),
+  PrereqIssued( $PI, $Wid, $sub, pk(~skH) )
+  ]->
+   [
+   !Victim_PrereqVC( $Wid, $PI, $sub, ~skH, pk(~skH),
+                     prereqVC($PI, $sub, pk(~skH), ~ltkPI)
+   ),
+   !StoredVictimHolderKey( $Wid, ~skH, pk(~skH) )
+   ]
+
+  /*
+  rule (modulo AC) Issue_Prerequisite_VC[color=#fef3c7, role='Setup']:
+     [ Fr( ~skH ), !Ltk_PI( $PI, ~ltkPI ) ]
+    --[
+    VictimKeyFresh( $Wid, ~skH, pk(~skH) ),
+    PrereqIssued( $PI, $Wid, $sub, pk(~skH) )
+    ]->
+     [
+     !Victim_PrereqVC( $Wid, $PI, $sub, ~skH, pk(~skH),
+                       sign(<'prereq-vc', $PI, $sub, pk(~skH)>, ~ltkPI)
+     ),
+     !StoredVictimHolderKey( $Wid, ~skH, pk(~skH) )
+     ]
+  */
+
+rule (modulo E) Adversary_Wallet_Key[color=#fecaca, role='Adv']:
+   [ Fr( ~skAdv ) ] --[ AdversaryKey( pk(~skAdv) ) ]-> [ Out( ~skAdv ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Reveal_CI_Ltk[color=#fecaca, role='Adv']:
+   [ !Ltk_CI( $CI, ~ltkCI ) ] --[ Reveal_CI( $CI ) ]-> [ Out( ~ltkCI ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Reveal_VictimHolderKey[color=#fecaca, role='Adv']:
+   [ !StoredVictimHolderKey( $Wid, ~skH, pkH ) ]
+  --[ Reveal_HolderKey( $Wid, pkH ) ]->
+   [ Out( ~skH ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) CI_IAE_Require_Presentation[color=#fef9c3, role='CI']:
+   [
+   In( <'iae-init', $CI> ), !Ltk_CI( $CI, ~ltkCI ), Fr( ~authSess ),
+   Fr( ~nonce )
+   ]
+  --[ CI_IAE_Start( $CI, ~authSess, ~nonce ) ]->
+   [
+   !CI_IAE_Pending( $CI, ~authSess, ~nonce ),
+   Out( <'iae-require-interaction', ~authSess, 
+         presReqSigned($CI, ~nonce, ~ltkCI)>
+   )
+   ]
+
+  /*
+  rule (modulo AC) CI_IAE_Require_Presentation[color=#fef9c3, role='CI']:
+     [
+     In( <'iae-init', $CI> ), !Ltk_CI( $CI, ~ltkCI ), Fr( ~authSess ),
+     Fr( ~nonce )
+     ]
+    --[ CI_IAE_Start( $CI, ~authSess, ~nonce ) ]->
+     [
+     !CI_IAE_Pending( $CI, ~authSess, ~nonce ),
+     Out( <'iae-require-interaction', ~authSess, 
+           <'openid4vp-request', $CI, <'iar', $CI>, ~nonce>, 
+           sign(<'openid4vp-request', $CI, <'iar', $CI>, ~nonce>, ~ltkCI)>
+     )
+     ]
+  */
+
+restriction Restr_CI_IAE_Verify_Presentation_1:
+  "∀ x #NOW. (Restr_CI_IAE_Verify_Presentation_1( x ) @ #NOW) ⇒ (x = true)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW. (Restr_CI_IAE_Verify_Presentation_1( x ) @ #NOW) ⇒ (x = true)"
+  */
+
+restriction Restr_CI_IAE_Verify_Presentation_2:
+  "∀ x #NOW. (Restr_CI_IAE_Verify_Presentation_2( x ) @ #NOW) ⇒ (x = true)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW. (Restr_CI_IAE_Verify_Presentation_2( x ) @ #NOW) ⇒ (x = true)"
+  */
+
+rule (modulo E) CI_IAE_Verify_Presentation[color=#fef9c3, role='CI']:
+   [
+   In( <'iae-followup', $CI, authSess, 'vp', $PI, sub, pkH_pres, vc, kbp> ),
+   !CI_IAE_Pending( $CI, authSess, nonce ), !Pk_PI( $PI, pkPI ),
+   Fr( ~atSecret )
+   ]
+  --[
+  CI_Accepted_Presentation( $CI, authSess, pkH_pres, sub, nonce ),
+  OnlyOnceV( <'presented', authSess> ),
+  Restr_CI_IAE_Verify_Presentation_1( verify(vc,
+                                             prereqPayload($PI, sub, pkH_pres), pkPI)
+  ),
+  Restr_CI_IAE_Verify_Presentation_2( verify(kbp, kbPayload($CI, nonce),
+                                             pkH_pres)
+  )
+  ]->
+   [
+   !CI_Authorized( $CI, authSess, aToken(~atSecret, authSess, $CI),
+                   pkH_pres, sub, nonce
+   ),
+   Out( aToken(~atSecret, authSess, $CI) )
+   ]
+
+  /*
+  rule (modulo AC) CI_IAE_Verify_Presentation[color=#fef9c3, role='CI']:
+     [
+     In( <'iae-followup', $CI, authSess, 'vp', $PI, sub, pkH_pres, vc, kbp> ),
+     !CI_IAE_Pending( $CI, authSess, nonce ), !Pk_PI( $PI, pkPI ),
+     Fr( ~atSecret )
+     ]
+    --[
+    CI_Accepted_Presentation( $CI, authSess, pkH_pres, sub, nonce ),
+    OnlyOnceV( <'presented', authSess> ),
+    Restr_CI_IAE_Verify_Presentation_1( z ),
+    Restr_CI_IAE_Verify_Presentation_2( z.1 )
+    ]->
+     [
+     !CI_Authorized( $CI, authSess, aToken(~atSecret, authSess, $CI),
+                     pkH_pres, sub, nonce
+     ),
+     Out( aToken(~atSecret, authSess, $CI) )
+     ]
+    variants (modulo AC)
+    1. $CI   = $CI.26
+       $PI   = $PI.27
+       kbp   = kbp.30
+       nonce = nonce.31
+       pkH_pres
+             = pkH_pres.32
+       pkPI  = pkPI.33
+       sub   = sub.34
+       vc    = vc.35
+       z     = verify(vc.35, <'prereq-vc', $PI.27, sub.34, pkH_pres.32>,
+                      pkPI.33)
+       z.1   = verify(kbp.30, <'kb-jwt', <'iar', $CI.26>, nonce.31>,
+                      pkH_pres.32)
+    
+    2. $CI   = $CI.52
+       $PI   = $PI.53
+       kbp   = sign(<'kb-jwt', <'iar', $CI.52>, nonce.57>, x.102)
+       nonce = nonce.57
+       pkH_pres
+             = pk(x.102)
+       pkPI  = pkPI.59
+       sub   = sub.60
+       vc    = vc.61
+       z     = verify(vc.61, <'prereq-vc', $PI.53, sub.60, pk(x.102)>, pkPI.59)
+       z.1   = true
+    
+    3. $CI   = $CI.53
+       $PI   = $PI.54
+       kbp   = kbp.57
+       nonce = nonce.58
+       pkH_pres
+             = pkH_pres.59
+       pkPI  = pk(x.104)
+       sub   = sub.61
+       vc    = sign(<'prereq-vc', $PI.54, sub.61, pkH_pres.59>, x.104)
+       z     = true
+       z.1   = verify(kbp.57, <'kb-jwt', <'iar', $CI.53>, nonce.58>,
+                      pkH_pres.59)
+    
+    4. $CI   = $CI.53
+       $PI   = $PI.54
+       kbp   = sign(<'kb-jwt', <'iar', $CI.53>, nonce.58>, x.103)
+       nonce = nonce.58
+       pkH_pres
+             = pk(x.103)
+       pkPI  = pk(x.104)
+       sub   = sub.61
+       vc    = sign(<'prereq-vc', $PI.54, sub.61, pk(x.103)>, x.104)
+       z     = true
+       z.1   = true
+  */
+
+restriction Restr_Victim_Present_VP_1:
+  "∀ x #NOW. (Restr_Victim_Present_VP_1( x ) @ #NOW) ⇒ (x = true)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW. (Restr_Victim_Present_VP_1( x ) @ #NOW) ⇒ (x = true)"
+  */
+
+rule (modulo E) Victim_Present_VP[color=#d1fae5, role='Holder']:
+   [
+   !Victim_PrereqVC( $Wid, $PI, sub, ~skH, pkH, vc ), !Pk_CI( CI, pkCI ),
+   In( <presReqPayload(CI, nonce), sig> )
+   ]
+  --[
+  Victim_Presented( $Wid, CI, pkH, sub, nonce ),
+  Restr_Victim_Present_VP_1( verify(sig, presReqPayload(CI, nonce), pkCI) )
+  ]->
+   [ Out( <'vp', $PI, sub, pkH, vc, kbProof(CI, nonce, ~skH)> ) ]
+
+  /*
+  rule (modulo AC) Victim_Present_VP[color=#d1fae5, role='Holder']:
+     [
+     !Victim_PrereqVC( $Wid, $PI, sub, ~skH, pkH, vc ), !Pk_CI( CI, pkCI ),
+     In( <<'openid4vp-request', CI, <'iar', CI>, nonce>, sig> )
+     ]
+    --[
+    Victim_Presented( $Wid, CI, pkH, sub, nonce ),
+    Restr_Victim_Present_VP_1( z )
+    ]->
+     [
+     Out( <'vp', $PI, sub, pkH, vc, sign(<'kb-jwt', <'iar', CI>, nonce>, ~skH)
+          >
+     )
+     ]
+    variants (modulo AC)
+    1. CI    = CI.21
+       nonce = nonce.22
+       pkCI  = pkCI.23
+       sig   = sig.25
+       z     = verify(sig.25,
+                      <'openid4vp-request', CI.21, <'iar', CI.21>, nonce.22>, pkCI.23)
+    
+    2. CI    = CI.55
+       nonce = nonce.56
+       pkCI  = pk(x.105)
+       sig   = sign(<'openid4vp-request', CI.55, <'iar', CI.55>, nonce.56>,
+                    x.105)
+       z     = true
+  */
+
+rule (modulo E) Hon_Client_Init[color=#bfdbfe, role='Wallet']:
+   [ !StoredVictimHolderKey( $Wid, ~skH, pkH ), Fr( ~sid ) ]
+  --[ Hon_Init( $Wid, $CI, ~sid ) ]->
+   [ Hon_St1( $Wid, $CI, ~sid, ~skH, pkH ), Out( <'iae-init', $CI> ) ]
+
+  /* has exactly the trivial AC variant */
+
+restriction Restr_Hon_Client_Followup_1:
+  "∀ x #NOW. (Restr_Hon_Client_Followup_1( x ) @ #NOW) ⇒ (x = true)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW. (Restr_Hon_Client_Followup_1( x ) @ #NOW) ⇒ (x = true)"
+  */
+
+rule (modulo E) Hon_Client_Followup[color=#bfdbfe, role='Wallet']:
+   [
+   Hon_St1( $Wid, $CI, ~sid, ~skH, pkH ), !Pk_CI( $CI, pkCI ),
+   In( <'iae-require-interaction', authSess, presReqPayload($CI, nonce), sig
+       >
+   ),
+   In( vp )
+   ]
+  --[
+  Hon_Followup( $Wid, $CI, ~sid, authSess, nonce ),
+  Restr_Hon_Client_Followup_1( verify(sig, presReqPayload($CI, nonce),
+                                      pkCI)
+  )
+  ]->
+   [
+   Hon_St2( $Wid, $CI, ~sid, ~skH, pkH, authSess, nonce ),
+   Out( <'iae-followup', $CI, authSess, vp> )
+   ]
+
+  /*
+  rule (modulo AC) Hon_Client_Followup[color=#bfdbfe, role='Wallet']:
+     [
+     Hon_St1( $Wid, $CI, ~sid, ~skH, pkH ), !Pk_CI( $CI, pkCI ),
+     In( <'iae-require-interaction', authSess, 
+          <'openid4vp-request', $CI, <'iar', $CI>, nonce>, sig>
+     ),
+     In( vp )
+     ]
+    --[
+    Hon_Followup( $Wid, $CI, ~sid, authSess, nonce ),
+    Restr_Hon_Client_Followup_1( z )
+    ]->
+     [
+     Hon_St2( $Wid, $CI, ~sid, ~skH, pkH, authSess, nonce ),
+     Out( <'iae-followup', $CI, authSess, vp> )
+     ]
+    variants (modulo AC)
+    1. $CI   = $CI.25
+       nonce = nonce.30
+       pkCI  = pkCI.31
+       sig   = sig.33
+       z     = verify(sig.33,
+                      <'openid4vp-request', $CI.25, <'iar', $CI.25>, nonce.30>, pkCI.31)
+    
+    2. $CI   = $CI.68
+       nonce = nonce.73
+       pkCI  = pk(x.134)
+       sig   = sign(<'openid4vp-request', $CI.68, <'iar', $CI.68>, nonce.73>,
+                    x.134)
+       z     = true
+  */
+
+rule (modulo E) Hon_Client_CredReq[color=#bfdbfe, role='Wallet']:
+   [
+   Hon_St2( $Wid, $CI, ~sid, ~skH, pkH, authSess, nonce ), In( AT ),
+   Fr( ~skE )
+   ]
+  --[ Hon_CredReq( $Wid, $CI, ~sid, pkH ) ]->
+   [
+   Hon_St3( $Wid, $CI, ~sid, ~skE, pk(~skE), pkH ),
+   Out( <'cred-req', AT, pkH, keyProofJWT($CI, pkH, ~skH), pk(~skE)> )
+   ]
+
+  /*
+  rule (modulo AC) Hon_Client_CredReq[color=#bfdbfe, role='Wallet']:
+     [
+     Hon_St2( $Wid, $CI, ~sid, ~skH, pkH, authSess, nonce ), In( AT ),
+     Fr( ~skE )
+     ]
+    --[ Hon_CredReq( $Wid, $CI, ~sid, pkH ) ]->
+     [
+     Hon_St3( $Wid, $CI, ~sid, ~skE, pk(~skE), pkH ),
+     Out( <'cred-req', AT, pkH, sign(<'oid4vci-proof', $CI, pkH>, ~skH), 
+           pk(~skE)>
+     )
+     ]
+  */
+
+rule (modulo E) Hon_Client_RecvCred[color=#bfdbfe, role='Wallet']:
+   [
+   Hon_St3( $Wid, $CI, ~sid, ~skE, pk(~skE), pkH_cred ),
+   In( penc(<'cred-resp', cred>, pk(~skE), rResp) )
+   ]
+  --[
+  WalletObtained( $Wid, $CI, pkH_cred, cred ), Finish( $Wid, $CI, ~sid )
+  ]->
+   [ ]
+
+  /* has exactly the trivial AC variant */
+
+restriction Restr_CI_Credential_Endpoint_1:
+  "∀ x #NOW. (Restr_CI_Credential_Endpoint_1( x ) @ #NOW) ⇒ (x = true)"
+  // safety formula
+
+  /*
+  expanded formula:
+  "∀ x #NOW. (Restr_CI_Credential_Endpoint_1( x ) @ #NOW) ⇒ (x = true)"
+  */
+
+rule (modulo E) CI_Credential_Endpoint[color=#fef9c3, role='CI']:
+   [
+   In( <'cred-req', AT, pkH_cred, keyProof, pkE> ),
+   !CI_Authorized( $CI, authSess, AT, pkH_pres, sub, nonce ),
+   !Ltk_CI( $CI, ~ltkCI ), Fr( ~rResp )
+   ]
+  --[
+  OnlyOnceV( <'at-redeemed', AT> ),
+  CI_Issued( $CI, authSess, pkH_pres, sub, pkH_cred,
+             credentialSig($CI, sub, pkH_cred, ~ltkCI)
+  ),
+  Restr_CI_Credential_Endpoint_1( verify(keyProof,
+                                         keyProofPayload($CI, pkH_cred), pkH_cred)
+  )
+  ]->
+   [
+   Out( penc(<'cred-resp', credentialSig($CI, sub, pkH_cred, ~ltkCI)>, pkE,
+             ~rResp)
+   )
+   ]
+
+  /*
+  rule (modulo AC) CI_Credential_Endpoint[color=#fef9c3, role='CI']:
+     [
+     In( <'cred-req', AT, pkH_cred, keyProof, pkE> ),
+     !CI_Authorized( $CI, authSess, AT, pkH_pres, sub, nonce ),
+     !Ltk_CI( $CI, ~ltkCI ), Fr( ~rResp )
+     ]
+    --[
+    OnlyOnceV( <'at-redeemed', AT> ),
+    CI_Issued( $CI, authSess, pkH_pres, sub, pkH_cred,
+               sign(<'credential', $CI, sub, pkH_cred>, ~ltkCI)
+    ),
+    Restr_CI_Credential_Endpoint_1( z )
+    ]->
+     [
+     Out( penc(<'cred-resp', sign(<'credential', $CI, sub, pkH_cred>, ~ltkCI)
+               >,
+               pkE, ~rResp)
+     )
+     ]
+    variants (modulo AC)
+    1. $CI   = $CI.26
+       keyProof
+             = keyProof.31
+       pkH_cred
+             = pkH_cred.34
+       z     = verify(keyProof.31, <'oid4vci-proof', $CI.26, pkH_cred.34>,
+                      pkH_cred.34)
+    
+    2. $CI   = $CI.71
+       keyProof
+             = sign(<'oid4vci-proof', $CI.71, pk(x.140)>, x.140)
+       pkH_cred
+             = pk(x.140)
+       z     = true
+  */
+
+lemma ltkCI_secrecy [reuse, use_induction]:
+  all-traces
+  "∀ CI k #r #i.
+    ((CIKey( CI, k ) @ #r) ∧ (!KU( k ) @ #i)) ⇒
+    (∃ #l. (Reveal_CI( CI ) @ #l) ∧ (#l < #i))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ CI k #r #i.
+  (CIKey( CI, k ) @ #r) ∧ (!KU( k ) @ #i)
+ ∧
+  ∀ #l. (Reveal_CI( CI ) @ #l) ⇒ ¬(#l < #i)"
+*/
+induction
+  case empty_trace
+  by contradiction /* from formulas */
+next
+  case non_empty_trace
+  solve( (last(#i))  ∥ (last(#r))  ∥
+         (∃ #l. (Reveal_CI( $CI ) @ #l) ∧ (¬(last(#l))) ∧ (#l < #i)) )
+    case case_1
+    solve( !KU( ~ltkCI ) @ #i )
+      case Reveal_CI_Ltk
+      by contradiction /* from formulas */
+    qed
+  next
+    case case_2
+    solve( !KU( ~ltkCI ) @ #i )
+      case Reveal_CI_Ltk
+      by contradiction /* from formulas */
+    qed
+  next
+    case case_3
+    by contradiction /* from formulas */
+  qed
+qed
+
+lemma skH_secrecy [reuse, use_induction]:
+  all-traces
+  "∀ Wid skH pkH #r #i.
+    ((VictimKeyFresh( Wid, skH, pkH ) @ #r) ∧ (!KU( skH ) @ #i)) ⇒
+    (∃ #l. (Reveal_HolderKey( Wid, pkH ) @ #l) ∧ (#l < #i))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ Wid skH pkH #r #i.
+  (VictimKeyFresh( Wid, skH, pkH ) @ #r) ∧ (!KU( skH ) @ #i)
+ ∧
+  ∀ #l. (Reveal_HolderKey( Wid, pkH ) @ #l) ⇒ ¬(#l < #i)"
+*/
+induction
+  case empty_trace
+  by contradiction /* from formulas */
+next
+  case non_empty_trace
+  solve( (last(#i))  ∥ (last(#r))  ∥
+         (∃ #l.
+           (Reveal_HolderKey( $Wid, pk(~skH) ) @ #l) ∧ (¬(last(#l))) ∧ (#l < #i)) )
+    case case_1
+    solve( !Ltk_PI( $PI, ~ltkPI ) ▶₁ #r )
+      case Register_PI
+      solve( !KU( ~skH ) @ #i )
+        case Reveal_VictimHolderKey
+        by contradiction /* from formulas */
+      qed
+    qed
+  next
+    case case_2
+    solve( !Ltk_PI( $PI, ~ltkPI ) ▶₁ #r )
+      case Register_PI
+      solve( !KU( ~skH ) @ #i )
+        case Reveal_VictimHolderKey
+        by contradiction /* from formulas */
+      qed
+    qed
+  next
+    case case_3
+    by contradiction /* from formulas */
+  qed
+qed
+
+lemma holderkey_unique [reuse, use_induction]:
+  all-traces
+  "∀ Wid1 Wid2 skH1 skH2 pkH #i #j.
+    ((VictimKeyFresh( Wid1, skH1, pkH ) @ #i) ∧
+     (VictimKeyFresh( Wid2, skH2, pkH ) @ #j)) ⇒
+    (#i = #j)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ Wid1 Wid2 skH1 skH2 pkH #i #j.
+  (VictimKeyFresh( Wid1, skH1, pkH ) @ #i) ∧
+  (VictimKeyFresh( Wid2, skH2, pkH ) @ #j)
+ ∧
+  ¬(#i = #j)"
+*/
+induction
+  case empty_trace
+  by contradiction /* from formulas */
+next
+  case non_empty_trace
+  by contradiction /* from formulas */
+qed
+
+lemma exec_honest_iae_flow:
+  exists-trace
+  "∃ Wid CI sid pkH_cred cred authSess pkH_pres sub #f #i.
+    (((Finish( Wid, CI, sid ) @ #f) ∧
+      (WalletObtained( Wid, CI, pkH_cred, cred ) @ #f)) ∧
+     (CI_Issued( CI, authSess, pkH_pres, sub, pkH_cred, cred ) @ #i)) ∧
+    (¬(∃ #r. Reveal_CI( CI ) @ #r))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ Wid CI sid pkH_cred cred authSess pkH_pres sub #f #i.
+  (Finish( Wid, CI, sid ) @ #f) ∧
+  (WalletObtained( Wid, CI, pkH_cred, cred ) @ #f) ∧
+  (CI_Issued( CI, authSess, pkH_pres, sub, pkH_cred, cred ) @ #i)
+ ∧
+  ∀ #r. (Reveal_CI( CI ) @ #r) ⇒ ⊥"
+*/
+simplify
+solve( Hon_St3( $Wid, $CI, ~sid, ~skE, pk(~skE), pk(x) ) ▶₀ #f )
+  case Hon_Client_CredReq
+  solve( !CI_Authorized( $CI, authSess, AT, pkH_pres, sub, nonce ) ▶₁ #i )
+    case CI_IAE_Verify_Presentation
+    solve( !Ltk_CI( $CI, ~ltkCI ) ▶₂ #i )
+      case Register_CI
+      solve( !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.1>,
+                       ~ltkCI)
+             ) @ #vk.27 )
+        case CI_IAE_Require_Presentation
+        solve( !KU( sign(<'prereq-vc', $PI.1, sub, pk(x)>, ~ltkPI.1) ) @ #vk.41 )
+          case Victim_Present_VP
+          solve( !KU( sign(<'kb-jwt', <'iar', $CI>, ~nonce>, ~skH.1) ) @ #vk.44 )
+            case Victim_Present_VP
+            solve( !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,
+                             ~ltkCI.1)
+                   ) @ #vk.54 )
+              case CI_IAE_Require_Presentation
+              solve( !KU( penc(<'cred-resp', 
+                                sign(<'credential', $CI, $sub, pk(~skH)>, ~ltkCI)>,
+                               pk(~skE), rResp)
+                     ) @ #vk.10 )
+                case CI_Credential_Endpoint
+                solve( !KU( sign(<'prereq-vc', $PI.2, $sub, pk(x)>, ~ltkPI.2)
+                       ) @ #vk.76 )
+                  case Victim_Present_VP
+                  solve( !KU( sign(<'kb-jwt', <'iar', $CI>, ~nonce.3>, ~skH.2) ) @ #vk.79 )
+                    case Victim_Present_VP
+                    solve( !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.3>,
+                                     ~ltkCI.2)
+                           ) @ #vk.88 )
+                      case CI_IAE_Require_Presentation
+                      solve( !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.27 )
+                        case CI_IAE_Verify_Presentation
+                        solve( !KU( aToken(~atSecret.1, ~authSess.5, $CI) ) @ #vk.84 )
+                          case CI_IAE_Verify_Presentation
+                          solve( !KU( ~authSess ) @ #vk.73 )
+                            case CI_IAE_Require_Presentation
+                            solve( !KU( ~nonce.1 ) @ #vk.71 )
+                              case CI_IAE_Require_Presentation
+                              solve( !KU( ~nonce ) @ #vk.83 )
+                                case CI_IAE_Require_Presentation
+                                solve( !KU( ~nonce.2 ) @ #vk.83 )
+                                  case CI_IAE_Require_Presentation
+                                  solve( !KU( ~authSess.5 ) @ #vk.86 )
+                                    case CI_IAE_Require_Presentation
+                                    solve( !KU( ~nonce.4 ) @ #vk.91 )
+                                      case CI_IAE_Require_Presentation
+                                      solve( !KU( ~nonce.3 ) @ #vk.91 )
+                                        case CI_IAE_Require_Presentation
+                                        solve( !KU( sign(<'oid4vci-proof', $CI, pk(~skH)>, ~skH) ) @ #vk.58 )
+                                          case Hon_Client_CredReq
+                                          solve( !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.5>,
+                                                           ~ltkCI)
+                                                 ) @ #vk.102 )
+                                            case CI_IAE_Require_Presentation
+                                            solve( !KU( ~nonce.5 ) @ #vk.102 )
+                                              case CI_IAE_Require_Presentation
+                                              solve( !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, ~nonce
+                                                               >,
+                                                               ~ltkCI)
+                                                     ) @ #vk.95 )
+                                                case CI_IAE_Require_Presentation
+                                                solve( !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, 
+                                                                  ~nonce.4>,
+                                                                 ~ltkCI)
+                                                       ) @ #vk.100 )
+                                                  case CI_IAE_Require_Presentation
+                                                  solve( !KU( pk(~skH) ) @ #vk.74 )
+                                                    case Hon_Client_CredReq
+                                                    solve( !KU( sign(<'openid4vp-request', $CI.3, 
+                                                                      <'iar', $CI.3>, nonce.6>,
+                                                                     ~ltkCI.3)
+                                                           ) @ #vk.115 )
+                                                      case CI_IAE_Require_Presentation
+                                                      solve( !KU( ~nonce.6 ) @ #vk.116 )
+                                                        case CI_IAE_Require_Presentation
+                                                        solve( !KU( pk(~skH.1) ) @ #vk.101 )
+                                                          case Hon_Client_CredReq
+                                                          solve( !KU( sign(<'openid4vp-request', $CI.4, 
+                                                                            <'iar', $CI.4>, nonce.7>,
+                                                                           ~ltkCI.4)
+                                                                 ) @ #vk.129 )
+                                                            case CI_IAE_Require_Presentation
+                                                            solve( !KU( ~nonce.7 ) @ #vk.130 )
+                                                              case CI_IAE_Require_Presentation
+                                                              solve( !KU( pk(~skE) ) @ #vk.117 )
+                                                                case Hon_Client_CredReq
+                                                                solve( !KU( pk(~skH.2) ) @ #vk.119 )
+                                                                  case Hon_Client_CredReq
+                                                                  solve( !KU( sign(<'openid4vp-request', 
+                                                                                    $CI.5, <'iar', $CI.5>, 
+                                                                                    nonce.8>,
+                                                                                   ~ltkCI.5)
+                                                                         ) @ #vk.143 )
+                                                                    case CI_IAE_Require_Presentation
+                                                                    solve( !KU( ~nonce.8 ) @ #vk.144 )
+                                                                      case CI_IAE_Require_Presentation
+                                                                      SOLVED // trace found
+                                                                    qed
+                                                                  qed
+                                                                qed
+                                                              qed
+                                                            qed
+                                                          qed
+                                                        qed
+                                                      qed
+                                                    qed
+                                                  qed
+                                                qed
+                                              qed
+                                            qed
+                                          qed
+                                        qed
+                                      qed
+                                    qed
+                                  qed
+                                qed
+                              qed
+                            qed
+                          qed
+                        qed
+                      qed
+                    qed
+                  qed
+                qed
+              qed
+            qed
+          qed
+        qed
+      qed
+    qed
+  qed
+qed
+
+lemma a1_no_impersonation [heuristic={a1_impersonation_tactic}]:
+  all-traces
+  "¬(∃ CI authSess Wid pkH_pres sub pkH_cred cred skH #iss #v #adv.
+      ((((CI_Issued( CI, authSess, pkH_pres, sub, pkH_cred, cred ) @ #iss) ∧
+         (VictimKeyFresh( Wid, skH, pkH_pres ) @ #v)) ∧
+        (AdversaryKey( pkH_cred ) @ #adv)) ∧
+       (¬(∃ #r. Reveal_CI( CI ) @ #r))) ∧
+      (¬(∃ #r. Reveal_HolderKey( Wid, pkH_pres ) @ #r)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ CI authSess Wid pkH_pres sub pkH_cred cred skH #iss #v #adv.
+  (CI_Issued( CI, authSess, pkH_pres, sub, pkH_cred, cred ) @ #iss) ∧
+  (VictimKeyFresh( Wid, skH, pkH_pres ) @ #v) ∧
+  (AdversaryKey( pkH_cred ) @ #adv)
+ ∧
+  (∀ #r. (Reveal_CI( CI ) @ #r) ⇒ ⊥) ∧
+  (∀ #r. (Reveal_HolderKey( Wid, pkH_pres ) @ #r) ⇒ ⊥)"
+*/
+simplify
+solve( !CI_Authorized( $CI, authSess, AT, pk(~skH), sub, nonce
+       ) ▶₁ #iss )
+  case CI_IAE_Verify_Presentation
+  solve( !Ltk_CI( $CI, ~ltkCI ) ▶₂ #iss )
+    case Register_CI
+    solve( !Ltk_PI( $PI, ~ltkPI ) ▶₁ #v )
+      case Register_PI
+      solve( !KU( pk(~skAdv) ) @ #vk.5 )
+        case c_pk
+        solve( !KU( sign(<'oid4vci-proof', $CI, pk(~skAdv)>, ~skAdv) ) @ #vk.7 )
+          case c_sign
+          solve( !KU( pk(~skH) ) @ #vk.24 )
+            case Hon_Client_CredReq
+            solve( !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH)>, ~ltkPI.1)
+                   ) @ #vk.27 )
+              case Victim_Present_VP
+              solve( !KU( sign(<'kb-jwt', <'iar', $CI>, ~nonce>, ~skH) ) @ #vk.28 )
+                case Victim_Present_VP
+                solve( !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.15 )
+                  case CI_IAE_Verify_Presentation
+                  solve( !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,
+                                   ~ltkCI.1)
+                         ) @ #vk.56 )
+                    case CI_IAE_Require_Presentation
+                    solve( !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.1>,
+                                     ~ltkCI.2)
+                           ) @ #vk.61 )
+                      case CI_IAE_Require_Presentation
+                      solve( !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, ~nonce>,
+                                       ~ltkCI)
+                             ) @ #vk.64 )
+                        case CI_IAE_Require_Presentation
+                        solve( !KU( ~authSess ) @ #vk.36 )
+                          case CI_IAE_Require_Presentation
+                          solve( !KU( ~skAdv ) @ #vk.44 )
+                            case Adversary_Wallet_Key
+                            solve( !KU( ~nonce ) @ #vk.64 )
+                              case CI_IAE_Require_Presentation
+                              solve( !KU( ~nonce.2 ) @ #vk.61 )
+                                case CI_IAE_Require_Presentation
+                                solve( !KU( ~nonce.1 ) @ #vk.64 )
+                                  case CI_IAE_Require_Presentation
+                                  SOLVED // trace found
+                                qed
+                              qed
+                            qed
+                          qed
+                        qed
+                      qed
+                    qed
+                  qed
+                qed
+              qed
+            qed
+          qed
+        qed
+      qed
+    qed
+  qed
+qed
+
+lemma a1_attack_witness [heuristic={a1_witness_tactic}]:
+  exists-trace
+  "∃ CI authSess Wid pkH_pres sub nonce pkH_cred cred skH #v #pres #iss
+     #adv #k.
+    (((((((VictimKeyFresh( Wid, skH, pkH_pres ) @ #v) ∧
+          (Victim_Presented( Wid, CI, pkH_pres, sub, nonce ) @ #pres)) ∧
+         (CI_Issued( CI, authSess, pkH_pres, sub, pkH_cred, cred ) @ #iss)) ∧
+        (AdversaryKey( pkH_cred ) @ #adv)) ∧
+       (K( cred ) @ #k)) ∧
+      (¬(pkH_cred = pkH_pres))) ∧
+     (¬(∃ c #r. Reveal_CI( c ) @ #r))) ∧
+    (¬(∃ W p #r. Reveal_HolderKey( W, p ) @ #r))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ CI authSess Wid pkH_pres sub nonce pkH_cred cred skH #v #pres #iss
+   #adv #k.
+  (VictimKeyFresh( Wid, skH, pkH_pres ) @ #v) ∧
+  (Victim_Presented( Wid, CI, pkH_pres, sub, nonce ) @ #pres) ∧
+  (CI_Issued( CI, authSess, pkH_pres, sub, pkH_cred, cred ) @ #iss) ∧
+  (AdversaryKey( pkH_cred ) @ #adv) ∧
+  (K( cred ) @ #k)
+ ∧
+  (¬(pkH_cred = pkH_pres)) ∧
+  (∀ c #r. (Reveal_CI( c ) @ #r) ⇒ ⊥) ∧
+  (∀ W p #r. (Reveal_HolderKey( W, p ) @ #r) ⇒ ⊥)"
+*/
+simplify
+solve( !CI_Authorized( $CI, authSess, AT, pk(~skH), sub.1, nonce.1
+       ) ▶₁ #iss )
+  case CI_IAE_Verify_Presentation
+  solve( !Ltk_PI( $PI.1, ~ltkPI ) ▶₁ #v )
+    case Register_PI
+    solve( !Victim_PrereqVC( $Wid, $PI, sub, ~skH.1, pk(~skH), vc
+           ) ▶₀ #pres )
+      case Issue_Prerequisite_VC
+      solve( !Pk_CI( $CI, pk(x) ) ▶₁ #pres )
+        case Register_CI
+        solve( !Ltk_CI( $CI, ~ltkCI ) ▶₂ #iss )
+          case Register_CI
+          solve( !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.1>,
+                           ~ltkCI)
+                 ) @ #vk.12 )
+            case CI_IAE_Require_Presentation
+            solve( !KU( pk(~skAdv) ) @ #vk.18 )
+              case c_pk
+              solve( !KU( sign(<'oid4vci-proof', $CI, pk(~skAdv)>, ~skAdv) ) @ #vk.20 )
+                case c_sign
+                solve( !KU( sign(<'credential', $CI, $sub, pk(~skAdv)>, ~ltkCI)
+                       ) @ #vk.23 )
+                  case CI_Credential_Endpoint
+                  solve( !KU( pk(~skH) ) @ #vk.42 )
+                    case Hon_Client_CredReq
+                    solve( !KU( sign(<'prereq-vc', $PI.1, $sub, pk(~skH)>, ~ltkPI.1)
+                           ) @ #vk.49 )
+                      case Victim_Present_VP
+                      solve( !KU( sign(<'kb-jwt', <'iar', $CI>, ~nonce>, ~skH) ) @ #vk.54 )
+                        case Victim_Present_VP
+                        solve( !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.48 )
+                          case CI_IAE_Verify_Presentation
+                          solve( !KU( aToken(~atSecret.1, ~authSess.2, $CI) ) @ #vk.68 )
+                            case CI_IAE_Verify_Presentation
+                            solve( !KU( pk(k.1) ) @ #vk.69 )
+                              case c_pk
+                              solve( !KU( pk(x) ) @ #vk.74 )
+                                case Hon_Client_CredReq_case_1
+                                solve( !KU( sign(<'prereq-vc', $PI.1, $sub, pk(~skH.1)>, ~ltkPI.1)
+                                       ) @ #vk.78 )
+                                  case Victim_Present_VP
+                                  solve( !KU( sign(<'kb-jwt', <'iar', $CI>, ~nonce.3>, ~skH.1) ) @ #vk.83 )
+                                    case Victim_Present_VP
+                                    solve( !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.5>,
+                                                     ~ltkCI.1)
+                                           ) @ #vk.97 )
+                                      case CI_IAE_Require_Presentation
+                                      solve( !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.2>,
+                                                       ~ltkCI.2)
+                                             ) @ #vk.104 )
+                                        case CI_IAE_Require_Presentation
+                                        solve( !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, ~nonce>,
+                                                         ~ltkCI)
+                                               ) @ #vk.107 )
+                                          case CI_IAE_Require_Presentation
+                                          solve( !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, 
+                                                            nonce.6>,
+                                                           ~ltkCI.3)
+                                                 ) @ #vk.112 )
+                                            case CI_IAE_Require_Presentation
+                                            solve( !KU( sign(<'openid4vp-request', $CI.4, <'iar', $CI.4>, 
+                                                              nonce.3>,
+                                                             ~ltkCI.4)
+                                                   ) @ #vk.117 )
+                                              case CI_IAE_Require_Presentation
+                                              solve( !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, 
+                                                                ~nonce.4>,
+                                                               ~ltkCI)
+                                                     ) @ #vk.120 )
+                                                case CI_IAE_Require_Presentation
+                                                solve( !KU( ~authSess ) @ #vk.90 )
+                                                  case CI_IAE_Require_Presentation
+                                                  solve( !KU( ~nonce.1 ) @ #vk.87 )
+                                                    case CI_IAE_Require_Presentation
+                                                    solve( !KU( ~skAdv ) @ #vk.99 )
+                                                      case Adversary_Wallet_Key
+                                                      solve( !KU( ~authSess.2 ) @ #vk.102 )
+                                                        case CI_IAE_Require_Presentation
+                                                        solve( !KU( ~nonce ) @ #vk.112 )
+                                                          case CI_IAE_Require_Presentation
+                                                          solve( !KU( ~nonce.4 ) @ #vk.120 )
+                                                            case CI_IAE_Require_Presentation
+                                                            solve( !KU( ~nonce.5 ) @ #vk.110 )
+                                                              case CI_IAE_Require_Presentation
+                                                              solve( !KU( ~nonce.2 ) @ #vk.113 )
+                                                                case CI_IAE_Require_Presentation
+                                                                solve( !KU( ~nonce.6 ) @ #vk.117 )
+                                                                  case CI_IAE_Require_Presentation
+                                                                  solve( !KU( ~nonce.3 ) @ #vk.120 )
+                                                                    case CI_IAE_Require_Presentation
+                                                                    SOLVED // trace found
+                                                                  qed
+                                                                qed
+                                                              qed
+                                                            qed
+                                                          qed
+                                                        qed
+                                                      qed
+                                                    qed
+                                                  qed
+                                                qed
+                                              qed
+                                            qed
+                                          qed
+                                        qed
+                                      qed
+                                    qed
+                                  qed
+                                qed
+                              qed
+                            qed
+                          qed
+                        qed
+                      qed
+                    qed
+                  qed
+                qed
+              qed
+            qed
+          qed
+        qed
+      qed
+    qed
+  qed
+qed
+
+lemma a1_holder_continuity_vuln [heuristic={a1_continuity_tactic}]:
+  all-traces
+  "∀ CI authSess Wid pkH_pres sub pkH_cred cred skH #iss #v.
+    ((((CI_Issued( CI, authSess, pkH_pres, sub, pkH_cred, cred ) @ #iss) ∧
+       (VictimKeyFresh( Wid, skH, pkH_pres ) @ #v)) ∧
+      (¬(∃ #r. Reveal_CI( CI ) @ #r))) ∧
+     (¬(∃ #r. Reveal_HolderKey( Wid, pkH_pres ) @ #r))) ⇒
+    (pkH_cred = pkH_pres)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ CI authSess Wid pkH_pres sub pkH_cred cred skH #iss #v.
+  (CI_Issued( CI, authSess, pkH_pres, sub, pkH_cred, cred ) @ #iss) ∧
+  (VictimKeyFresh( Wid, skH, pkH_pres ) @ #v)
+ ∧
+  (∀ #r. (Reveal_CI( CI ) @ #r) ⇒ ⊥) ∧
+  (∀ #r. (Reveal_HolderKey( Wid, pkH_pres ) @ #r) ⇒ ⊥) ∧
+  (¬(pkH_cred = pkH_pres))"
+*/
+simplify
+solve( !CI_Authorized( $CI, authSess, AT, pk(~skH), sub, nonce
+       ) ▶₁ #iss )
+  case CI_IAE_Verify_Presentation
+  solve( !Ltk_CI( $CI, ~ltkCI ) ▶₂ #iss )
+    case Register_CI
+    solve( !Ltk_PI( $PI, ~ltkPI ) ▶₁ #v )
+      case Register_PI
+      solve( !KU( pk(x) ) @ #vk.5 )
+        case Hon_Client_CredReq_case_1
+        solve( !KU( sign(<'oid4vci-proof', $CI, pk(~skH)>, ~skH) ) @ #vk.7 )
+          case Hon_Client_CredReq
+          solve( !KU( pk(~skH.1) ) @ #vk.25 )
+            case Hon_Client_CredReq
+            solve( !KU( sign(<'prereq-vc', $PI.1, sub, pk(~skH.1)>, ~ltkPI.1)
+                   ) @ #vk.29 )
+              case Victim_Present_VP
+              solve( !KU( sign(<'kb-jwt', <'iar', $CI>, ~nonce>, ~skH.1) ) @ #vk.31 )
+                case Victim_Present_VP
+                solve( !KU( aToken(~atSecret, ~authSess, $CI) ) @ #vk.13 )
+                  case CI_IAE_Verify_Presentation
+                  solve( !KU( sign(<'openid4vp-request', $CI.1, <'iar', $CI.1>, nonce.2>,
+                                   ~ltkCI.1)
+                         ) @ #vk.65 )
+                    case CI_IAE_Require_Presentation
+                    solve( !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, nonce.3>,
+                                     ~ltkCI)
+                           ) @ #vk.71 )
+                      case CI_IAE_Require_Presentation
+                      solve( !KU( sign(<'openid4vp-request', $CI.2, <'iar', $CI.2>, nonce.4>,
+                                       ~ltkCI.2)
+                             ) @ #vk.77 )
+                        case CI_IAE_Require_Presentation
+                        solve( !KU( sign(<'openid4vp-request', $CI.3, <'iar', $CI.3>, nonce.1>,
+                                         ~ltkCI.3)
+                               ) @ #vk.82 )
+                          case CI_IAE_Require_Presentation
+                          solve( !KU( sign(<'openid4vp-request', $CI, <'iar', $CI>, ~nonce>,
+                                           ~ltkCI)
+                                 ) @ #vk.85 )
+                            case CI_IAE_Require_Presentation
+                            solve( !KU( ~authSess ) @ #vk.45 )
+                              case CI_IAE_Require_Presentation
+                              solve( !KU( ~nonce ) @ #vk.85 )
+                                case CI_IAE_Require_Presentation
+                                solve( !KU( ~nonce.2 ) @ #vk.73 )
+                                  case CI_IAE_Require_Presentation
+                                  solve( !KU( ~nonce.3 ) @ #vk.77 )
+                                    case CI_IAE_Require_Presentation
+                                    solve( !KU( ~nonce.4 ) @ #vk.82 )
+                                      case CI_IAE_Require_Presentation
+                                      solve( !KU( ~nonce.1 ) @ #vk.85 )
+                                        case CI_IAE_Require_Presentation
+                                        SOLVED // trace found
+                                      qed
+                                    qed
+                                  qed
+                                qed
+                              qed
+                            qed
+                          qed
+                        qed
+                      qed
+                    qed
+                  qed
+                qed
+              qed
+            qed
+          qed
+        qed
+      qed
+    qed
+  qed
+qed
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.12.0
+Maude version 3.5.1
+Git revision: UNKNOWN, branch: UNKNOWN
+Compiled at: 2026-03-08 10:05:47.616272992 UTC
+*/
+
+end

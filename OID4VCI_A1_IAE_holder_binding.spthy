@@ -1,0 +1,714 @@
+/*
+==============================================================================
+  OID4VCI  A1  —  IAE Cross-Session Holder-Binding Confusion
+  Interactive Authorization Endpoint (Presentation-During-Issuance)
+==============================================================================
+
+  Tool:           Tamarin Prover 1.12.0 / Maude 3.5.1 (verified on this version)
+  Spec analysed:  OpenID for Verifiable Credential Issuance, Interactive
+                  Authorization Endpoint (IAE), v1.1 editor's draft.
+                  Sections: §6 (IAE), §6.2.1.4 (Preventing Session Fixation),
+                  Appendix A.2.5 / A.3.5 (Holder-Binding "iar:" audience).
+  Companion:      Security & Trust in the OpenID4VC Ecosystem (Fett /
+                  Lodderstedt), §4.3 holder-binding requirements I-40, P-50.
+
+
+==============================================================================
+  FOUR CONFIGURATIONS — pass exactly one -D flag at runtime
+==============================================================================
+
+  -DVULNERABLE   Spec-as-written. The Issuer (acting as OpenID4VP Verifier)
+                 binds the required presentation to (a) the opaque server-side
+                 auth_session handle, (b) the "iar:<IAE-URL>" audience, and (c)
+                 the OpenID4VP nonce associated with auth_session per §6.2.1.4.
+                 It does NOT bind the holder key of the presented VP to the
+                 holder key the freshly issued credential is bound to.
+
+  -DFIXED_NONCE  NEGATIVE RESULT. Binds the presentation nonce into the
+                 issuance key-proof and checks it equals the auth_session
+                 nonce. Does NOT close A1: the nonce is public (it ships in the
+                 require-interaction response), so any party freshly mints a
+                 proof over ITS OWN key carrying that nonce.
+
+  -DFIXED        PRIMARY FIX (holder-key continuity). Issuer requires the
+                 issuance key-proof to verify under, and the issued credential
+                 to be bound to, the holder key that produced the accepted VP.
+
+  -DFIXED_TXDATA STRONGER / MORE FLEXIBLE FIX. The presenting holder commits,
+                 inside its KB-JWT, to h(pkH_iss) of the (possibly fresh) key
+                 the new credential should be bound to. Issuer checks
+                 h(key-proof.pkH) = commitment. Closes A1 while permitting
+                 per-credential key separation (pkH_iss != pkH_pres) for
+                 unlinkability.
+
+
+==============================================================================
+  THE ATTACK A1 (cross-session holder-binding confusion)
+==============================================================================
+
+  CI offers "presentation during issuance": to obtain a derived credential the
+  wallet must present an existing credential. CI acts as an OpenID4VP Verifier;
+  the new credential's subject is taken from the PRESENTED credential, while its
+  holder-binding key is taken from the ISSUANCE key-proof. §6 mandates NO
+  cryptographic linkage between these two holder keys.
+
+  Adversary: a malicious / compromised split-architecture wallet backend
+  (§13.4) -- equivalently a Dolev-Yao attacker driving its own auth_session and
+  relaying the honest holder's presentation. Issuer honest; prerequisite issuer
+  PI honest; victim honest with un-leaked holder key.
+
+  Trace: attacker opens auth_session_A -> CI returns signed presReq (nonce_A,
+  aud iar:CI) -> attacker relays it to the victim -> victim returns a VP bound
+  to (iar:CI, nonce_A) under skH_pres -> attacker submits (auth_session_A, VP)
+  -> CI accepts (nonce_A == auth_session_A nonce, §6.2.1.4 SATISFIED) and mints
+  an AT bound to auth_session_A storing pkH_pres + the victim's subject ->
+  attacker sends a Credential Request with a key-proof under ITS OWN key ->
+  CI, finding no requirement that the proof key equal pkH_pres, issues a
+  credential carrying the VICTIM's subject bound to the ATTACKER's key.
+
+  Why §6.2.1.4 does not help: it only forces nonce == auth_session; nonce_A
+  does match. The missing link is pkH_pres = pkH_proof.
+  Why stock abstractions do not rule it out: TLS-as-confidential-channel and
+  EUF-CMA both hold; k_pres and k_proof are different terms with no relating
+  equation. It is a binding failure, not an interception.
+
+
+==============================================================================
+  ABSTRACTIONS
+==============================================================================
+
+  A1. TLS -> Dolev-Yao In/Out.
+  A2. OAuth/PAR + Token Endpoint folded into one opaque, session-bound Access
+      Token aToken/3 (private) minted by the IAE verify step and gating the
+      Credential Endpoint (issue #225: the access token still gates the request).
+  A3. DPoP OMITTED: it sender-constrains the AT to the client's transport key,
+      not the holder/issuance key, so it gives no uplift against A1.
+  A4. Carry-and-verify for the presented VC (plain signing has no message
+      recovery): subject and holder key travel in the VP and the Issuer
+      reconstructs the signed payload and checks it with verify().
+  A5. Single derived-credential dataset.
+  A6. PI honest, issues only to honest holders (the attacker cannot mint itself
+      a prerequisite VC). A1 hijacks the honest holder's presentation; it does
+      not require the attacker to present.
+  A7. "Cross-session": the attacker opens its own auth_session and consumes a
+      presentation the victim produced for the (relayed, Issuer-signed) request.
+
+
+==============================================================================
+  HOW TO RUN
+==============================================================================
+
+  tamarin-prover --prove -DVULNERABLE    --auto-sources OID4VCI_A1_IAE_holder_binding_v2.spthy
+  tamarin-prover --prove -DFIXED_NONCE   --auto-sources OID4VCI_A1_IAE_holder_binding_v2.spthy
+  tamarin-prover --prove -DFIXED         --auto-sources OID4VCI_A1_IAE_holder_binding_v2.spthy
+  tamarin-prover --prove -DFIXED_TXDATA  --auto-sources OID4VCI_A1_IAE_holder_binding_v2.spthy
+
+==============================================================================
+*/
+
+theory OID4VCI_A1 begin
+
+builtins: signing, hashing
+
+functions:  penc/3, pdec/2
+equations:  pdec(penc(m, pk(k), r), k) = m
+
+functions:  aToken/3 [private]
+
+
+// ============================================================================
+//                                MACROS
+// ============================================================================
+
+macros:
+
+  iarAud(CI) = <'iar', CI>,
+
+  presReqPayload(CI, nonce)        = <'openid4vp-request', CI, iarAud(CI), nonce>,
+  presReqSigned(CI, nonce, ltkCI)  = <presReqPayload(CI, nonce),
+                                      sign(presReqPayload(CI, nonce), ltkCI)>,
+
+  prereqPayload(PI, sub, pkH)      = <'prereq-vc', PI, sub, pkH>,
+  prereqVC(PI, sub, pkH, ltkPI)    = sign(prereqPayload(PI, sub, pkH), ltkPI),
+
+  kbPayload(CI, nonce)             = <'kb-jwt', iarAud(CI), nonce>,
+  kbProof(CI, nonce, skH)          = sign(kbPayload(CI, nonce), skH),
+
+  kbPayloadTx(CI, nonce, cmt)      = <'kb-jwt-tx', iarAud(CI), nonce, cmt>,
+  kbProofTx(CI, nonce, cmt, skH)   = sign(kbPayloadTx(CI, nonce, cmt), skH),
+
+  keyProofPayload(CI, pkH)         = <'oid4vci-proof', CI, pkH>,
+  keyProofJWT(CI, pkH, skH)        = sign(keyProofPayload(CI, pkH), skH),
+
+  keyProofPayloadN(CI, pkH, nonce) = <'oid4vci-proof-n', CI, pkH, nonce>,
+  keyProofJWTN(CI, pkH, nonce, skH)= sign(keyProofPayloadN(CI, pkH, nonce), skH),
+
+  credPayload(CI, sub, pkH)        = <'credential', CI, sub, pkH>,
+  credentialSig(CI, sub, pkH, ltkCI) = sign(credPayload(CI, sub, pkH), ltkCI)
+
+
+// ============================================================================
+//                              PREDICATES
+// ============================================================================
+
+predicates:
+  HonestCI(CI)              <=> not (Ex #r. Reveal_CI(CI) @ r),
+  NoHolderKeyLeak(Wid, pkH) <=> not (Ex #r. Reveal_HolderKey(Wid, pkH) @ r)
+
+
+// ============================================================================
+//                              RESTRICTIONS
+// ============================================================================
+
+restriction Eq:
+  "All x y #i. Eq(x,y) @ i ==> x = y"
+
+restriction OnlyOnceV:
+  "All x #i #j. OnlyOnceV(x) @ i & OnlyOnceV(x) @ j ==> #i = #j"
+
+
+// ============================================================================
+//                          PARTY SETUP  (config-independent)
+// ============================================================================
+
+rule Register_CI [color=#fef3c7, role="Setup"]:
+    [ Fr(~ltkCI) ]
+  --[ Register_CI($CI), CIKey($CI, ~ltkCI), OnlyOnceV(<'reg-ci', $CI>) ]->
+    [ !Ltk_CI($CI, ~ltkCI), !Pk_CI($CI, pk(~ltkCI)), Out(pk(~ltkCI)) ]
+
+rule Register_PI [color=#fef3c7, role="Setup"]:
+    [ Fr(~ltkPI) ]
+  --[ Register_PI($PI), OnlyOnceV(<'reg-pi', $PI>) ]->
+    [ !Ltk_PI($PI, ~ltkPI), !Pk_PI($PI, pk(~ltkPI)), Out(pk(~ltkPI)) ]
+
+rule Issue_Prerequisite_VC [color=#fef3c7, role="Setup"]:
+  let
+    pkH = pk(~skH)
+    vc  = prereqVC($PI, $sub, pkH, ~ltkPI)
+  in
+    [ Fr(~skH), !Ltk_PI($PI, ~ltkPI) ]
+  --[ VictimKeyFresh($Wid, ~skH, pkH),
+      PrereqIssued($PI, $Wid, $sub, pkH) ]->
+    [ !Victim_PrereqVC($Wid, $PI, $sub, ~skH, pkH, vc),
+      !StoredVictimHolderKey($Wid, ~skH, pkH) ]
+
+rule Adversary_Wallet_Key [color=#fecaca, role="Adv"]:
+    [ Fr(~skAdv) ] --[ AdversaryKey(pk(~skAdv)) ]-> [ Out(~skAdv) ]
+
+
+// ============================================================================
+//                            REVEAL RULES
+// ============================================================================
+
+rule Reveal_CI_Ltk [color=#fecaca, role="Adv"]:
+    [ !Ltk_CI($CI, ~ltkCI) ] --[ Reveal_CI($CI) ]-> [ Out(~ltkCI) ]
+
+rule Reveal_VictimHolderKey [color=#fecaca, role="Adv"]:
+    [ !StoredVictimHolderKey($Wid, ~skH, pkH) ]
+  --[ Reveal_HolderKey($Wid, pkH) ]->
+    [ Out(~skH) ]
+
+
+// ============================================================================
+//   ISSUER IAE — STEP 1: require a presentation   (config-independent)
+// ============================================================================
+
+rule CI_IAE_Require_Presentation [color=#fef9c3, role="CI"]:
+  let
+    presReq = presReqSigned($CI, ~nonce, ~ltkCI)
+  in
+    [ In(<'iae-init', $CI>),
+      !Ltk_CI($CI, ~ltkCI),
+      Fr(~authSess), Fr(~nonce) ]
+  --[ CI_IAE_Start($CI, ~authSess, ~nonce) ]->
+    [ !CI_IAE_Pending($CI, ~authSess, ~nonce),
+      Out(<'iae-require-interaction', ~authSess, presReq>) ]
+
+
+// ============================================================================
+//   ISSUER IAE — STEP 2: verify presentation, mint Access Token
+//   (§6.2.1.4: the KB-JWT nonce is checked against the auth_session nonce)
+// ============================================================================
+
+#ifdef VULNERABLE
+rule CI_IAE_Verify_Presentation [color=#fef9c3, role="CI"]:
+  let
+    vp = <'vp', $PI, sub, pkH_pres, vc, kbp>
+    AT = aToken(~atSecret, authSess, $CI)
+  in
+    [ In(<'iae-followup', $CI, authSess, vp>),
+      !CI_IAE_Pending($CI, authSess, nonce),
+      !Pk_PI($PI, pkPI),
+      Fr(~atSecret) ]
+  --[ _restrict( verify(vc,  prereqPayload($PI, sub, pkH_pres), pkPI)    = true ),
+      _restrict( verify(kbp, kbPayload($CI, nonce),             pkH_pres) = true ),
+      CI_Accepted_Presentation($CI, authSess, pkH_pres, sub, nonce),
+      OnlyOnceV(<'presented', authSess>) ]->
+    [ !CI_Authorized($CI, authSess, AT, pkH_pres, sub, nonce),
+      Out(AT) ]
+#endif
+
+#ifdef FIXED_NONCE
+rule CI_IAE_Verify_Presentation [color=#fef9c3, role="CI"]:
+  let
+    vp = <'vp', $PI, sub, pkH_pres, vc, kbp>
+    AT = aToken(~atSecret, authSess, $CI)
+  in
+    [ In(<'iae-followup', $CI, authSess, vp>),
+      !CI_IAE_Pending($CI, authSess, nonce),
+      !Pk_PI($PI, pkPI),
+      Fr(~atSecret) ]
+  --[ _restrict( verify(vc,  prereqPayload($PI, sub, pkH_pres), pkPI)    = true ),
+      _restrict( verify(kbp, kbPayload($CI, nonce),             pkH_pres) = true ),
+      CI_Accepted_Presentation($CI, authSess, pkH_pres, sub, nonce),
+      OnlyOnceV(<'presented', authSess>) ]->
+    [ !CI_Authorized($CI, authSess, AT, pkH_pres, sub, nonce),
+      Out(AT) ]
+#endif
+
+#ifdef FIXED
+rule CI_IAE_Verify_Presentation [color=#fef9c3, role="CI"]:
+  let
+    vp = <'vp', $PI, sub, pkH_pres, vc, kbp>
+    AT = aToken(~atSecret, authSess, $CI)
+  in
+    [ In(<'iae-followup', $CI, authSess, vp>),
+      !CI_IAE_Pending($CI, authSess, nonce),
+      !Pk_PI($PI, pkPI),
+      Fr(~atSecret) ]
+  --[ _restrict( verify(vc,  prereqPayload($PI, sub, pkH_pres), pkPI)    = true ),
+      _restrict( verify(kbp, kbPayload($CI, nonce),             pkH_pres) = true ),
+      CI_Accepted_Presentation($CI, authSess, pkH_pres, sub, nonce),
+      OnlyOnceV(<'presented', authSess>) ]->
+    [ !CI_Authorized($CI, authSess, AT, pkH_pres, sub, nonce),
+      Out(AT) ]
+#endif
+
+#ifdef FIXED_TXDATA
+rule CI_IAE_Verify_Presentation [color=#fef9c3, role="CI"]:
+  let
+    vp = <'vp-tx', $PI, sub, pkH_pres, cmt, vc, kbp>
+    AT = aToken(~atSecret, authSess, $CI)
+  in
+    [ In(<'iae-followup', $CI, authSess, vp>),
+      !CI_IAE_Pending($CI, authSess, nonce),
+      !Pk_PI($PI, pkPI),
+      Fr(~atSecret) ]
+  --[ _restrict( verify(vc,  prereqPayload($PI, sub, pkH_pres), pkPI)    = true ),
+      _restrict( verify(kbp, kbPayloadTx($CI, nonce, cmt),      pkH_pres) = true ),
+      CI_Accepted_Presentation($CI, authSess, pkH_pres, sub, nonce),
+      CI_Accepted_Commitment($CI, authSess, cmt),
+      OnlyOnceV(<'presented', authSess>) ]->
+    [ !CI_Authorized_Tx($CI, authSess, AT, pkH_pres, sub, nonce, cmt),
+      Out(AT) ]
+#endif
+
+
+// ============================================================================
+//   HONEST HOLDER — PRESENTATION  (standalone; relay-able by the network)
+// ============================================================================
+
+#ifdef VULNERABLE
+rule Victim_Present_VP [color=#d1fae5, role="Holder"]:
+  let
+    reqPayload = presReqPayload(CI, nonce)
+    kbp        = kbProof(CI, nonce, ~skH)
+    vp         = <'vp', $PI, sub, pkH, vc, kbp>
+  in
+    [ !Victim_PrereqVC($Wid, $PI, sub, ~skH, pkH, vc),
+      !Pk_CI(CI, pkCI),
+      In(<reqPayload, sig>) ]
+  --[ _restrict( verify(sig, reqPayload, pkCI) = true ),
+      Victim_Presented($Wid, CI, pkH, sub, nonce) ]->
+    [ Out(vp) ]
+#endif
+
+#ifdef FIXED_NONCE
+rule Victim_Present_VP [color=#d1fae5, role="Holder"]:
+  let
+    reqPayload = presReqPayload(CI, nonce)
+    kbp        = kbProof(CI, nonce, ~skH)
+    vp         = <'vp', $PI, sub, pkH, vc, kbp>
+  in
+    [ !Victim_PrereqVC($Wid, $PI, sub, ~skH, pkH, vc),
+      !Pk_CI(CI, pkCI),
+      In(<reqPayload, sig>) ]
+  --[ _restrict( verify(sig, reqPayload, pkCI) = true ),
+      Victim_Presented($Wid, CI, pkH, sub, nonce) ]->
+    [ Out(vp) ]
+#endif
+
+#ifdef FIXED
+rule Victim_Present_VP [color=#d1fae5, role="Holder"]:
+  let
+    reqPayload = presReqPayload(CI, nonce)
+    kbp        = kbProof(CI, nonce, ~skH)
+    vp         = <'vp', $PI, sub, pkH, vc, kbp>
+  in
+    [ !Victim_PrereqVC($Wid, $PI, sub, ~skH, pkH, vc),
+      !Pk_CI(CI, pkCI),
+      In(<reqPayload, sig>) ]
+  --[ _restrict( verify(sig, reqPayload, pkCI) = true ),
+      Victim_Presented($Wid, CI, pkH, sub, nonce) ]->
+    [ Out(vp) ]
+#endif
+
+#ifdef FIXED_TXDATA
+rule Victim_Present_VP [color=#d1fae5, role="Holder"]:
+  let
+    reqPayload = presReqPayload(CI, nonce)
+    pkHiss     = pk(~skHiss)
+    cmt        = h(pkHiss)
+    kbp        = kbProofTx(CI, nonce, cmt, ~skH)
+    vp         = <'vp-tx', $PI, sub, pkH, cmt, vc, kbp>
+  in
+    [ !Victim_PrereqVC($Wid, $PI, sub, ~skH, pkH, vc),
+      !Pk_CI(CI, pkCI),
+      Fr(~skHiss),
+      In(<reqPayload, sig>) ]
+  --[ _restrict( verify(sig, reqPayload, pkCI) = true ),
+      Victim_Presented($Wid, CI, pkH, sub, nonce),
+      Victim_Committed($Wid, pkHiss),
+      IssuanceKeyFresh($Wid, ~skHiss, pkHiss) ]->
+    [ Out(vp),
+      !StoredIssuanceKey($Wid, ~skHiss, pkHiss) ]
+#endif
+
+
+// ============================================================================
+//   HONEST ISSUANCE CLIENT  (drives the benign flow -> executability)
+// ============================================================================
+
+rule Hon_Client_Init [color=#bfdbfe, role="Wallet"]:
+    [ !StoredVictimHolderKey($Wid, ~skH, pkH), Fr(~sid) ]
+  --[ Hon_Init($Wid, $CI, ~sid) ]->
+    [ Hon_St1($Wid, $CI, ~sid, ~skH, pkH), Out(<'iae-init', $CI>) ]
+
+rule Hon_Client_Followup [color=#bfdbfe, role="Wallet"]:
+  let
+    reqPayload = presReqPayload($CI, nonce)
+  in
+    [ Hon_St1($Wid, $CI, ~sid, ~skH, pkH),
+      !Pk_CI($CI, pkCI),
+      In(<'iae-require-interaction', authSess, <reqPayload, sig>>),
+      In(vp) ]
+  --[ _restrict( verify(sig, reqPayload, pkCI) = true ),
+      Hon_Followup($Wid, $CI, ~sid, authSess, nonce) ]->
+    [ Hon_St2($Wid, $CI, ~sid, ~skH, pkH, authSess, nonce),
+      Out(<'iae-followup', $CI, authSess, vp>) ]
+
+#ifdef VULNERABLE
+rule Hon_Client_CredReq [color=#bfdbfe, role="Wallet"]:
+  let
+    pkE      = pk(~skE)
+    keyProof = keyProofJWT($CI, pkH, ~skH)
+  in
+    [ Hon_St2($Wid, $CI, ~sid, ~skH, pkH, authSess, nonce), In(AT), Fr(~skE) ]
+  --[ Hon_CredReq($Wid, $CI, ~sid, pkH) ]->
+    [ Hon_St3($Wid, $CI, ~sid, ~skE, pkE, pkH),
+      Out(<'cred-req', AT, pkH, keyProof, pkE>) ]
+#endif
+
+#ifdef FIXED
+rule Hon_Client_CredReq [color=#bfdbfe, role="Wallet"]:
+  let
+    pkE      = pk(~skE)
+    keyProof = keyProofJWT($CI, pkH, ~skH)
+  in
+    [ Hon_St2($Wid, $CI, ~sid, ~skH, pkH, authSess, nonce), In(AT), Fr(~skE) ]
+  --[ Hon_CredReq($Wid, $CI, ~sid, pkH) ]->
+    [ Hon_St3($Wid, $CI, ~sid, ~skE, pkE, pkH),
+      Out(<'cred-req', AT, pkH, keyProof, pkE>) ]
+#endif
+
+#ifdef FIXED_NONCE
+rule Hon_Client_CredReq [color=#bfdbfe, role="Wallet"]:
+  let
+    pkE      = pk(~skE)
+    keyProof = keyProofJWTN($CI, pkH, nonce, ~skH)
+  in
+    [ Hon_St2($Wid, $CI, ~sid, ~skH, pkH, authSess, nonce), In(AT), Fr(~skE) ]
+  --[ Hon_CredReq($Wid, $CI, ~sid, pkH) ]->
+    [ Hon_St3($Wid, $CI, ~sid, ~skE, pkE, pkH),
+      Out(<'cred-req', AT, pkH, keyProof, pkE>) ]
+#endif
+
+#ifdef FIXED_TXDATA
+rule Hon_Client_CredReq [color=#bfdbfe, role="Wallet"]:
+  let
+    pkE      = pk(~skE)
+    keyProof = keyProofJWT($CI, pkHiss, ~skHiss)
+  in
+    [ Hon_St2($Wid, $CI, ~sid, ~skH, pkH, authSess, nonce),
+      !StoredIssuanceKey($Wid, ~skHiss, pkHiss),
+      In(AT), Fr(~skE) ]
+  --[ Hon_CredReq($Wid, $CI, ~sid, pkHiss) ]->
+    [ Hon_St3($Wid, $CI, ~sid, ~skE, pkE, pkHiss),
+      Out(<'cred-req', AT, pkHiss, keyProof, pkE>) ]
+#endif
+
+rule Hon_Client_RecvCred [color=#bfdbfe, role="Wallet"]:
+  let
+    encCred = penc(<'cred-resp', cred>, pk(~skE), rResp)
+  in
+    [ Hon_St3($Wid, $CI, ~sid, ~skE, pk(~skE), pkH_cred),
+      In(encCred) ]
+  --[ WalletObtained($Wid, $CI, pkH_cred, cred),
+      Finish($Wid, $CI, ~sid) ]->
+    [ ]
+
+
+// ============================================================================
+//   CREDENTIAL ENDPOINT   (one shape; configs differ only in the issuer check)
+//   pkH_cred is the requester's submitted key, bound into the credential, and
+//   recorded faithfully in CI_Issued in EVERY config.
+// ============================================================================
+
+// -------- VULNERABLE: no key check ------------------------------------------
+#ifdef VULNERABLE
+rule CI_Credential_Endpoint [color=#fef9c3, role="CI"]:
+  let
+    cred    = credentialSig($CI, sub, pkH_cred, ~ltkCI)
+    encCred = penc(<'cred-resp', cred>, pkE, ~rResp)
+  in
+    [ In(<'cred-req', AT, pkH_cred, keyProof, pkE>),
+      !CI_Authorized($CI, authSess, AT, pkH_pres, sub, nonce),
+      !Ltk_CI($CI, ~ltkCI),
+      Fr(~rResp) ]
+  --[ _restrict( verify(keyProof, keyProofPayload($CI, pkH_cred), pkH_cred) = true ),
+      OnlyOnceV(<'at-redeemed', AT>),
+      CI_Issued($CI, authSess, pkH_pres, sub, pkH_cred, cred) ]->
+    [ Out(encCred) ]
+#endif
+
+// -------- FIXED_NONCE (NEGATIVE): key-proof binds the presentation nonce -----
+#ifdef FIXED_NONCE
+rule CI_Credential_Endpoint [color=#fef9c3, role="CI"]:
+  let
+    cred    = credentialSig($CI, sub, pkH_cred, ~ltkCI)
+    encCred = penc(<'cred-resp', cred>, pkE, ~rResp)
+  in
+    [ In(<'cred-req', AT, pkH_cred, keyProof, pkE>),
+      !CI_Authorized($CI, authSess, AT, pkH_pres, sub, nonce),
+      !Ltk_CI($CI, ~ltkCI),
+      Fr(~rResp) ]
+  --[ _restrict( verify(keyProof, keyProofPayloadN($CI, pkH_cred, nonce), pkH_cred) = true ),
+      OnlyOnceV(<'at-redeemed', AT>),
+      CI_Issued($CI, authSess, pkH_pres, sub, pkH_cred, cred) ]->
+    [ Out(encCred) ]
+#endif
+
+
+#ifdef FIXED
+rule CI_Credential_Endpoint [color=#fef9c3, role="CI"]:
+  let
+    cred    = credentialSig($CI, sub, pkH_cred, ~ltkCI)
+    encCred = penc(<'cred-resp', cred>, pkE, ~rResp)
+  in
+    [ In(<'cred-req', AT, pkH_cred, keyProof, pkE>),
+      !CI_Authorized($CI, authSess, AT, pkH_pres, sub, nonce),
+      !Ltk_CI($CI, ~ltkCI),
+      Fr(~rResp) ]
+  --[ _restrict( verify(keyProof, keyProofPayload($CI, pkH_cred), pkH_cred) = true ),
+      Eq(pkH_cred, pkH_pres),
+      OnlyOnceV(<'at-redeemed', AT>),
+      CI_Issued($CI, authSess, pkH_pres, sub, pkH_cred, cred) ]->
+    [ Out(encCred) ]
+#endif
+
+// -------- FIXED_TXDATA: issued key must match the presenter's commitment -----
+#ifdef FIXED_TXDATA
+rule CI_Credential_Endpoint [color=#fef9c3, role="CI"]:
+  let
+    cred    = credentialSig($CI, sub, pkH_cred, ~ltkCI)
+    encCred = penc(<'cred-resp', cred>, pkE, ~rResp)
+  in
+    [ In(<'cred-req', AT, pkH_cred, keyProof, pkE>),
+      !CI_Authorized_Tx($CI, authSess, AT, pkH_pres, sub, nonce, cmt),
+      !Ltk_CI($CI, ~ltkCI),
+      Fr(~rResp) ]
+  --[ _restrict( verify(keyProof, keyProofPayload($CI, pkH_cred), pkH_cred) = true ),
+      Eq(cmt, h(pkH_cred)),
+      OnlyOnceV(<'at-redeemed', AT>),
+      CI_Issued($CI, authSess, pkH_pres, sub, pkH_cred, cred) ]->
+    [ Out(encCred) ]
+#endif
+
+
+// ============================================================================
+//                          HELPER LEMMAS  (all configs)
+// ============================================================================
+
+lemma ltkCI_secrecy [reuse, use_induction]:
+  "All CI k #r #i.
+       CIKey(CI, k) @ r & KU(k) @ i
+     ==> (Ex #l. Reveal_CI(CI) @ l & l < i)"
+
+lemma skH_secrecy [reuse, use_induction]:
+  "All Wid skH pkH #r #i.
+       VictimKeyFresh(Wid, skH, pkH) @ r & KU(skH) @ i
+     ==> (Ex #l. Reveal_HolderKey(Wid, pkH) @ l & l < i)"
+
+lemma holderkey_unique [reuse, use_induction]:
+  "All Wid1 Wid2 skH1 skH2 pkH #i #j.
+       VictimKeyFresh(Wid1, skH1, pkH) @ i
+     & VictimKeyFresh(Wid2, skH2, pkH) @ j
+     ==> #i = #j"
+
+
+// ============================================================================
+//                          EXECUTABILITY  (all configs)
+// ============================================================================
+
+lemma exec_honest_iae_flow:
+  exists-trace
+  "Ex Wid CI sid pkH_cred cred authSess pkH_pres sub #f #i.
+        Finish(Wid, CI, sid) @ f
+      & WalletObtained(Wid, CI, pkH_cred, cred) @ f
+      & CI_Issued(CI, authSess, pkH_pres, sub, pkH_cred, cred) @ i
+      & HonestCI(CI)"
+
+
+// ============================================================================
+//                              TACTICS
+// ============================================================================
+
+tactic: a1_witness_tactic
+  presort: C
+  prio:
+    regex "CI_Issued\("
+    regex "CI_Accepted_Presentation\("
+    regex "Victim_Presented\("
+    regex "AdversaryKey\("
+    regex "!CI_Authorized"
+    regex "!CI_IAE_Pending\("
+  deprio:
+    regex "!KU\( ~ltkCI"
+    regex "!KU\( ~skH"
+    regex "!KU\( ~"
+
+tactic: a1_continuity_tactic
+  presort: C
+  prio:
+    regex "CI_Issued\("
+    regex "CI_Accepted_Presentation\("
+    regex "Victim_Presented\("
+    regex "Victim_Committed\("
+    regex "Reveal_HolderKey\("
+    regex "!CI_Authorized"
+    regex "!CI_IAE_Pending\("
+  deprio:
+    regex "!KU\( ~ltkCI"
+    regex "!KU\( ~skH"
+    regex "!KU\( ~"
+
+// serves a1_no_impersonation in both directions (counterexample + proof)
+tactic: a1_impersonation_tactic
+  presort: C
+  prio:
+    regex "CI_Issued\("
+    regex "AdversaryKey\("
+    regex "CI_Accepted_Presentation\("
+    regex "Victim_Presented\("
+    regex "Victim_Committed\("
+    regex "!CI_Authorized"
+    regex "!CI_IAE_Pending\("
+  deprio:
+    regex "!KU\( ~ltkCI"
+    regex "!KU\( ~skH"
+    regex "!KU\( ~"
+
+
+lemma a1_no_impersonation [heuristic={a1_impersonation_tactic}]:
+  "not (Ex CI authSess Wid pkH_pres sub pkH_cred cred skH #iss #v #adv.
+            CI_Issued(CI, authSess, pkH_pres, sub, pkH_cred, cred) @ iss
+          & VictimKeyFresh(Wid, skH, pkH_pres) @ v
+          & AdversaryKey(pkH_cred) @ adv
+          & (not (Ex #r. Reveal_CI(CI) @ r))
+          & (not (Ex #r. Reveal_HolderKey(Wid, pkH_pres) @ r)) )"
+
+
+// ============================================================================
+//   VULNERABLE  —  the attack + the falsified holder-continuity property
+// ============================================================================
+
+#ifdef VULNERABLE
+
+
+lemma a1_attack_witness [heuristic={a1_witness_tactic}]:
+  exists-trace
+  "Ex CI authSess Wid pkH_pres sub nonce pkH_cred cred skH
+      #v #pres #iss #adv #k.
+        VictimKeyFresh(Wid, skH, pkH_pres) @ v
+      & Victim_Presented(Wid, CI, pkH_pres, sub, nonce) @ pres
+      & CI_Issued(CI, authSess, pkH_pres, sub, pkH_cred, cred) @ iss
+      & AdversaryKey(pkH_cred) @ adv
+      & K(cred) @ k
+      & not (pkH_cred = pkH_pres)
+      & (not (Ex c #r. Reveal_CI(c) @ r))
+      & (not (Ex W p #r. Reveal_HolderKey(W, p) @ r))"
+
+lemma a1_holder_continuity_vuln [heuristic={a1_continuity_tactic}]:
+  "All CI authSess Wid pkH_pres sub pkH_cred cred skH #iss #v.
+        CI_Issued(CI, authSess, pkH_pres, sub, pkH_cred, cred) @ iss
+      & VictimKeyFresh(Wid, skH, pkH_pres) @ v
+      & HonestCI(CI)
+      & NoHolderKeyLeak(Wid, pkH_pres)
+      ==> pkH_cred = pkH_pres"
+
+#endif
+
+
+// ============================================================================
+//   FIXED_NONCE  (NEGATIVE RESULT)  —  nonce binding does not close A1
+// ============================================================================
+
+#ifdef FIXED_NONCE
+
+lemma a1_holder_continuity_nonce [heuristic={a1_continuity_tactic}]:
+  "All CI authSess Wid pkH_pres sub pkH_cred cred skH #iss #v.
+        CI_Issued(CI, authSess, pkH_pres, sub, pkH_cred, cred) @ iss
+      & VictimKeyFresh(Wid, skH, pkH_pres) @ v
+      & HonestCI(CI)
+      & NoHolderKeyLeak(Wid, pkH_pres)
+      ==> pkH_cred = pkH_pres"
+
+#endif
+
+
+// ============================================================================
+//   FIXED  —  holder-key continuity closes A1
+// ============================================================================
+
+#ifdef FIXED
+
+lemma a1_holder_continuity_fixed [heuristic={a1_continuity_tactic}]:
+  "All CI authSess Wid pkH_pres sub pkH_cred cred skH #iss #v.
+        CI_Issued(CI, authSess, pkH_pres, sub, pkH_cred, cred) @ iss
+      & VictimKeyFresh(Wid, skH, pkH_pres) @ v
+      & HonestCI(CI)
+      & NoHolderKeyLeak(Wid, pkH_pres)
+      ==> pkH_cred = pkH_pres"
+
+#endif
+
+
+// ============================================================================
+//   FIXED_TXDATA  —  authorised issuance key closes A1 (allows key separation)
+// ============================================================================
+
+#ifdef FIXED_TXDATA
+
+lemma a1_holder_authorization_txdata [heuristic={a1_continuity_tactic}]:
+  "All CI authSess Wid pkH_pres sub pkH_cred cred skH #iss #v.
+        CI_Issued(CI, authSess, pkH_pres, sub, pkH_cred, cred) @ iss
+      & VictimKeyFresh(Wid, skH, pkH_pres) @ v
+      & HonestCI(CI)
+      & NoHolderKeyLeak(Wid, pkH_pres)
+      ==> (Ex #c. Victim_Committed(Wid, pkH_cred) @ c)"
+
+#endif
+
+
+end
+
